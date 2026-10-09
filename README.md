@@ -112,3 +112,6 @@ render.yaml         # Render deployment configuration
 - This is a mock operations app, not a production database-backed system.
 - The backend stores data in memory and resets when the container restarts.
 - For production, swap the in-memory data source for Postgres, MongoDB, or another persistent store.
+
+##NOTES
+https://docs.google.com/document/d/164UiklNqHUOLI5gsAqDS3K1AqN24cn7iFNl82y-TWHQ/edit?tab=t.0
