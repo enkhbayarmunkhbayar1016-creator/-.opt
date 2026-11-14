@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1794648678178" clover="3.2.0">
+  <project timestamp="1794648678178" name="All files">
+    <metrics statements="397" coveredstatements="372" conditionals="381" coveredconditionals="352" methods="203" coveredmethods="184" elements="981" coveredelements="908" complexity="0" loc="397" ncloc="397" packages="4" files="15" classes="15"/>
+    <package name="src">
+      <metrics statements="206" coveredstatements="191" conditionals="161" coveredconditionals="143" methods="80" coveredmethods="66"/>
+      <file name="App.tsx" path="/home/runner/work/-.opt/-.opt/src/App.tsx">
+        <metrics statements="39" coveredstatements="28" conditionals="16" coveredconditionals="16" methods="25" coveredmethods="16"/>
+        <line num="11" count="10" type="stmt"/>
+        <line num="13" count="630" type="stmt"/>
+        <line num="16" count="1" type="stmt"/>
+        <line num="29" count="9" type="stmt"/>
+        <line num="43" count="11" type="stmt"/>
+        <line num="44" count="11" type="stmt"/>
+        <line num="45" count="4" type="stmt"/>
+        <line num="47" count="11" type="stmt"/>
+        <line num="51" count="11" type="stmt"/>
+        <line num="52" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="53" count="6" type="stmt"/>
+        <line num="54" count="6" type="stmt"/>
+        <line num="57" count="11" type="stmt"/>
+        <line num="59" count="11" type="cond" truecount="2" falsecount="0"/>
+        <line num="60" count="3" type="stmt"/>
+        <line num="62" count="1" type="stmt"/>
+        <line num="68" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="69" count="2" type="stmt"/>
+        <line num="73" count="0" type="stmt"/>
+        <line num="74" count="0" type="stmt"/>
+        <line num="80" count="6" type="stmt"/>
+        <line num="89" count="0" type="stmt"/>
+        <line num="105" count="1" type="stmt"/>
+        <line num="106" count="1" type="stmt"/>
+        <line num="123" count="0" type="stmt"/>
+        <line num="130" count="2" type="stmt"/>
+        <line num="171" count="0" type="stmt"/>
+        <line num="178" count="0" type="stmt"/>
+        <line num="204" count="18" type="stmt"/>
+        <line num="239" count="1" type="stmt"/>
+        <line num="240" count="1" type="stmt"/>
+        <line num="250" count="60" type="stmt"/>
+        <line num="254" count="0" type="stmt"/>
+        <line num="255" count="0" type="stmt"/>
+        <line num="297" count="18" type="stmt"/>
+        <line num="313" count="0" type="stmt"/>
+        <line num="314" count="0" type="stmt"/>
+        <line num="357" count="18" type="stmt"/>
+        <line num="377" count="0" type="stmt"/>
+      </file>
+      <file name="MobileLogin.tsx" path="/home/runner/work/-.opt/-.opt/src/MobileLogin.tsx">
+        <metrics statements="72" coveredstatements="71" conditionals="94" coveredconditionals="89" methods="18" coveredmethods="17"/>
+        <line num="4" count="3" type="stmt"/>
+        <line num="5" count="3" type="stmt"/>
+        <line num="6" count="3" type="stmt"/>
+        <line num="15" count="3" type="stmt"/>
+        <line num="46" count="3" type="stmt"/>
+        <line num="48" count="3" type="stmt"/>
+        <line num="57" count="1296" type="stmt"/>
+        <line num="58" count="1296" type="stmt"/>
+        <line num="59" count="1296" type="stmt"/>
+        <line num="60" count="1296" type="stmt"/>
+        <line num="61" count="1296" type="stmt"/>
+        <line num="62" count="1296" type="stmt"/>
+        <line num="63" count="1296" type="stmt"/>
+        <line num="64" count="1296" type="stmt"/>
+        <line num="65" count="1296" type="stmt"/>
+        <line num="66" count="1296" type="stmt"/>
+        <line num="67" count="1296" type="stmt"/>
+        <line num="68" count="1296" type="stmt"/>
+        <line num="69" count="1296" type="stmt"/>
+        <line num="71" count="1296" type="stmt"/>
+        <line num="72" count="3" type="stmt"/>
+        <line num="73" count="3" type="stmt"/>
+        <line num="74" count="3" type="stmt"/>
+        <line num="77" count="1296" type="stmt"/>
+        <line num="78" count="43" type="stmt"/>
+        <line num="79" count="43" type="stmt"/>
+        <line num="80" count="43" type="stmt"/>
+        <line num="81" count="43" type="stmt"/>
+        <line num="83" count="43" type="stmt"/>
+        <line num="84" count="43" type="cond" truecount="2" falsecount="0"/>
+        <line num="85" count="2" type="stmt"/>
+        <line num="92" count="2" type="stmt"/>
+        <line num="93" count="2" type="stmt"/>
+        <line num="94" count="41" type="cond" truecount="2" falsecount="0"/>
+        <line num="95" count="1" type="stmt"/>
+        <line num="96" count="1" type="stmt"/>
+        <line num="97" count="40" type="cond" truecount="2" falsecount="0"/>
+        <line num="98" count="38" type="stmt"/>
+        <line num="99" count="36" type="stmt"/>
+        <line num="100" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="101" count="1" type="stmt"/>
+        <line num="102" count="1" type="stmt"/>
+        <line num="103" count="1" type="stmt"/>
+        <line num="104" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="105" count="1" type="stmt"/>
+        <line num="110" count="1" type="stmt"/>
+        <line num="111" count="1" type="stmt"/>
+        <line num="112" count="1" type="stmt"/>
+        <line num="113" count="1" type="stmt"/>
+        <line num="117" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="126" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="128" count="43" type="stmt"/>
+        <line num="133" count="1296" type="cond" truecount="2" falsecount="0"/>
+        <line num="145" count="1296" type="cond" truecount="2" falsecount="0"/>
+        <line num="159" count="1296" type="stmt"/>
+        <line num="230" count="2043" type="stmt"/>
+        <line num="239" count="38" type="stmt"/>
+        <line num="249" count="32" type="stmt"/>
+        <line num="250" count="32" type="stmt"/>
+        <line num="251" count="32" type="stmt"/>
+        <line num="252" count="32" type="stmt"/>
+        <line num="269" count="18" type="stmt"/>
+        <line num="283" count="222" type="stmt"/>
+        <line num="291" count="1" type="stmt"/>
+        <line num="306" count="10" type="stmt"/>
+        <line num="319" count="16" type="stmt"/>
+        <line num="334" count="555" type="stmt"/>
+        <line num="352" count="12" type="stmt"/>
+        <line num="372" count="513" type="stmt"/>
+        <line num="409" count="1" type="stmt"/>
+        <line num="420" count="2" type="stmt"/>
+        <line num="429" count="0" type="stmt"/>
+      </file>
+      <file name="MobileOpsApp.tsx" path="/home/runner/work/-.opt/-.opt/src/MobileOpsApp.tsx">
+        <metrics statements="43" coveredstatements="42" conditionals="29" coveredconditionals="23" methods="13" coveredmethods="13"/>
+        <line num="27" count="2" type="stmt"/>
+        <line num="44" count="2" type="stmt"/>
+        <line num="53" count="294" type="stmt"/>
+        <line num="54" count="294" type="cond" truecount="2" falsecount="0"/>
+        <line num="60" count="467" type="stmt"/>
+        <line num="61" count="467" type="stmt"/>
+        <line num="70" count="467" type="stmt"/>
+        <line num="73" count="467" type="stmt"/>
+        <line num="74" count="160" type="stmt"/>
+        <line num="76" count="134" type="stmt"/>
+        <line num="77" count="134" type="stmt"/>
+        <line num="80" count="467" type="stmt"/>
+        <line num="81" count="171" type="cond" truecount="2" falsecount="0"/>
+        <line num="82" count="136" type="stmt"/>
+        <line num="85" count="35" type="stmt"/>
+        <line num="87" count="35" type="stmt"/>
+        <line num="90" count="30" type="cond" truecount="2" falsecount="0"/>
+        <line num="91" count="29" type="stmt"/>
+        <line num="95" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="96" count="4" type="stmt"/>
+        <line num="100" count="35" type="stmt"/>
+        <line num="101" count="35" type="stmt"/>
+        <line num="105" count="467" type="stmt"/>
+        <line num="106" count="146" type="cond" truecount="2" falsecount="0"/>
+        <line num="107" count="6" type="stmt"/>
+        <line num="110" count="140" type="stmt"/>
+        <line num="111" count="140" type="stmt"/>
+        <line num="114" count="467" type="stmt"/>
+        <line num="123" count="35" type="stmt"/>
+        <line num="124" count="35" type="stmt"/>
+        <line num="127" count="467" type="stmt"/>
+        <line num="128" count="3" type="stmt"/>
+        <line num="129" count="3" type="stmt"/>
+        <line num="130" count="3" type="stmt"/>
+        <line num="131" count="3" type="stmt"/>
+        <line num="134" count="467" type="cond" truecount="2" falsecount="0"/>
+        <line num="135" count="44" type="stmt"/>
+        <line num="140" count="423" type="cond" truecount="2" falsecount="0"/>
+        <line num="141" count="2" type="cond" truecount="2" falsecount="2"/>
+        <line num="142" count="0" type="stmt"/>
+        <line num="154" count="2" type="stmt"/>
+        <line num="157" count="421" type="stmt"/>
+        <line num="188" count="467" type="stmt"/>
+      </file>
+      <file name="NpmSecurityGuide.tsx" path="/home/runner/work/-.opt/-.opt/src/NpmSecurityGuide.tsx">
+        <metrics statements="9" coveredstatements="9" conditionals="2" coveredconditionals="2" methods="7" coveredmethods="7"/>
+        <line num="5" count="2" type="stmt"/>
+        <line num="36" count="2" type="stmt"/>
+        <line num="64" count="1" type="stmt"/>
+        <line num="142" count="5" type="stmt"/>
+        <line num="177" count="4" type="stmt"/>
+        <line num="237" count="4" type="stmt"/>
+        <line num="282" count="4" type="stmt"/>
+        <line num="341" count="4" type="stmt"/>
+        <line num="385" count="6" type="stmt"/>
+      </file>
+      <file name="RentalCatalogPage.tsx" path="/home/runner/work/-.opt/-.opt/src/RentalCatalogPage.tsx">
+        <metrics statements="27" coveredstatements="25" conditionals="18" coveredconditionals="12" methods="13" coveredmethods="9"/>
+        <line num="18" count="1" type="stmt"/>
+        <line num="19" count="114" type="stmt"/>
+        <line num="30" count="8" type="stmt"/>
+        <line num="31" count="8" type="stmt"/>
+        <line num="32" count="8" type="stmt"/>
+        <line num="33" count="8" type="stmt"/>
+        <line num="35" count="8" type="stmt"/>
+        <line num="36" count="2" type="stmt"/>
+        <line num="37" count="2" type="stmt"/>
+        <line num="40" count="8" type="stmt"/>
+        <line num="41" count="7" type="stmt"/>
+        <line num="42" count="7" type="stmt"/>
+        <line num="43" count="441" type="cond" truecount="2" falsecount="0"/>
+        <line num="45" count="441" type="cond" truecount="2" falsecount="0"/>
+        <line num="49" count="441" type="cond" truecount="2" falsecount="0"/>
+        <line num="53" count="8" type="stmt"/>
+        <line num="54" count="8" type="stmt"/>
+        <line num="56" count="8" type="stmt"/>
+        <line num="111" count="4" type="stmt"/>
+        <line num="112" count="4" type="stmt"/>
+        <line num="125" count="1" type="stmt"/>
+        <line num="126" count="1" type="stmt"/>
+        <line num="132" count="80" type="stmt"/>
+        <line num="149" count="57" type="stmt"/>
+        <line num="150" count="57" type="stmt"/>
+        <line num="209" count="0" type="stmt"/>
+        <line num="221" count="0" type="stmt"/>
+      </file>
+      <file name="rentalCatalog.ts" path="/home/runner/work/-.opt/-.opt/src/rentalCatalog.ts">
+        <metrics statements="16" coveredstatements="16" conditionals="2" coveredconditionals="1" methods="4" coveredmethods="4"/>
+        <line num="1" count="2" type="stmt"/>
+        <line num="127" count="20" type="stmt"/>
+        <line num="129" count="2" type="stmt"/>
+        <line num="142" count="2" type="stmt"/>
+        <line num="165" count="2" type="stmt"/>
+        <line num="231" count="2" type="stmt"/>
+        <line num="239" count="2" type="stmt"/>
+        <line num="245" count="126" type="stmt"/>
+        <line num="246" count="126" type="stmt"/>
+        <line num="247" count="126" type="stmt"/>
+        <line num="250" count="2" type="stmt"/>
+        <line num="251" count="2" type="stmt"/>
+        <line num="253" count="2" type="stmt"/>
+        <line num="254" count="20" type="stmt"/>
+        <line num="255" count="126" type="cond" truecount="1" falsecount="1"/>
+        <line num="256" count="126" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.lib">
+      <metrics statements="19" coveredstatements="19" conditionals="6" coveredconditionals="6" methods="13" coveredmethods="13"/>
+      <file name="api.ts" path="/home/runner/work/-.opt/-.opt/src/lib/api.ts">
+        <metrics statements="19" coveredstatements="19" conditionals="6" coveredconditionals="6" methods="13" coveredmethods="13"/>
+        <line num="69" count="4" type="stmt"/>
+        <line num="70" count="14" type="stmt"/>
+        <line num="78" count="14" type="cond" truecount="2" falsecount="0"/>
+        <line num="79" count="2" type="stmt"/>
+        <line num="80" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="83" count="12" type="stmt"/>
+        <line num="86" count="4" type="stmt"/>
+        <line num="87" count="3" type="stmt"/>
+        <line num="95" count="1" type="stmt"/>
+        <line num="100" count="1" type="stmt"/>
+        <line num="108" count="1" type="stmt"/>
+        <line num="113" count="1" type="stmt"/>
+        <line num="118" count="1" type="stmt"/>
+        <line num="122" count="1" type="stmt"/>
+        <line num="123" count="1" type="stmt"/>
+        <line num="124" count="1" type="stmt"/>
+        <line num="125" count="1" type="stmt"/>
+        <line num="126" count="1" type="stmt"/>
+        <line num="128" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.mobile">
+      <metrics statements="17" coveredstatements="17" conditionals="26" coveredconditionals="22" methods="8" coveredmethods="8"/>
+      <file name="data.ts" path="/home/runner/work/-.opt/-.opt/src/mobile/data.ts">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="5" count="2" type="stmt"/>
+      </file>
+      <file name="ui.tsx" path="/home/runner/work/-.opt/-.opt/src/mobile/ui.tsx">
+        <metrics statements="16" coveredstatements="16" conditionals="26" coveredconditionals="22" methods="8" coveredmethods="8"/>
+        <line num="4" count="2" type="stmt"/>
+        <line num="5" count="2" type="stmt"/>
+        <line num="22" count="2" type="stmt"/>
+        <line num="23" count="2" type="stmt"/>
+        <line num="32" count="2437" type="stmt"/>
+        <line num="52" count="316" type="cond" truecount="2" falsecount="0"/>
+        <line num="58" count="316" type="stmt"/>
+        <line num="108" count="316" type="stmt"/>
+        <line num="115" count="316" type="stmt"/>
+        <line num="119" count="1264" type="cond" truecount="3" falsecount="0"/>
+        <line num="123" count="1264" type="stmt"/>
+        <line num="129" count="48" type="stmt"/>
+        <line num="150" count="316" type="stmt"/>
+        <line num="165" count="375" type="stmt"/>
+        <line num="173" count="375" type="stmt"/>
+        <line num="189" count="839" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.mobile.screens">
+      <metrics statements="155" coveredstatements="145" conditionals="188" coveredconditionals="181" methods="102" coveredmethods="97"/>
+      <file name="calendar.tsx" path="/home/runner/work/-.opt/-.opt/src/mobile/screens/calendar.tsx">
+        <metrics statements="59" coveredstatements="50" conditionals="12" coveredconditionals="7" methods="30" coveredmethods="26"/>
+        <line num="5" count="20" type="stmt"/>
+        <line num="6" count="2" type="stmt"/>
+        <line num="7" count="2" type="stmt"/>
+        <line num="8" count="2" type="stmt"/>
+        <line num="22" count="2" type="stmt"/>
+        <line num="23" count="2" type="stmt"/>
+        <line num="24" count="96" type="stmt"/>
+        <line num="25" count="96" type="cond" truecount="2" falsecount="0"/>
+        <line num="26" count="96" type="stmt"/>
+        <line num="29" count="2" type="stmt"/>
+        <line num="30" count="70" type="stmt"/>
+        <line num="37" count="35" type="stmt"/>
+        <line num="38" count="35" type="stmt"/>
+        <line num="39" count="35" type="stmt"/>
+        <line num="40" count="35" type="stmt"/>
+        <line num="41" count="35" type="stmt"/>
+        <line num="42" count="35" type="stmt"/>
+        <line num="44" count="35" type="stmt"/>
+        <line num="45" count="35" type="stmt"/>
+        <line num="46" count="35" type="stmt"/>
+        <line num="47" count="35" type="stmt"/>
+        <line num="48" count="35" type="stmt"/>
+        <line num="49" count="35" type="stmt"/>
+        <line num="50" count="620" type="stmt"/>
+        <line num="54" count="35" type="stmt"/>
+        <line num="55" count="0" type="stmt"/>
+        <line num="56" count="0" type="cond" truecount="0" falsecount="4"/>
+        <line num="57" count="0" type="stmt"/>
+        <line num="60" count="0" type="stmt"/>
+        <line num="61" count="0" type="stmt"/>
+        <line num="62" count="0" type="stmt"/>
+        <line num="63" count="0" type="stmt"/>
+        <line num="67" count="35" type="stmt"/>
+        <line num="68" count="1" type="stmt"/>
+        <line num="69" count="1" type="stmt"/>
+        <line num="72" count="35" type="stmt"/>
+        <line num="73" count="1" type="stmt"/>
+        <line num="74" count="1" type="stmt"/>
+        <line num="75" count="1" type="stmt"/>
+        <line num="79" count="35" type="stmt"/>
+        <line num="82" count="1" type="stmt"/>
+        <line num="93" count="0" type="stmt"/>
+        <line num="105" count="1" type="stmt"/>
+        <line num="109" count="350" type="stmt"/>
+        <line num="121" count="1" type="stmt"/>
+        <line num="126" count="420" type="stmt"/>
+        <line num="136" count="0" type="stmt"/>
+        <line num="144" count="245" type="stmt"/>
+        <line num="152" count="146" type="stmt"/>
+        <line num="155" count="1085" type="stmt"/>
+        <line num="157" count="1085" type="stmt"/>
+        <line num="166" count="11" type="stmt"/>
+        <line num="190" count="1" type="stmt"/>
+        <line num="194" count="210" type="stmt"/>
+        <line num="212" count="1" type="stmt"/>
+        <line num="216" count="1680" type="stmt"/>
+        <line num="232" count="1" type="stmt"/>
+        <line num="236" count="1680" type="stmt"/>
+        <line num="260" count="4" type="stmt"/>
+      </file>
+      <file name="core.tsx" path="/home/runner/work/-.opt/-.opt/src/mobile/screens/core.tsx">
+        <metrics statements="43" coveredstatements="42" conditionals="105" coveredconditionals="103" methods="31" coveredmethods="30"/>
+        <line num="30" count="90" type="stmt"/>
+        <line num="32" count="90" type="cond" truecount="4" falsecount="0"/>
+        <line num="34" count="90" type="cond" truecount="2" falsecount="0"/>
+        <line num="40" count="90" type="stmt"/>
+        <line num="49" count="3" type="stmt"/>
+        <line num="61" count="1" type="stmt"/>
+        <line num="86" count="1" type="stmt"/>
+        <line num="104" count="270" type="stmt"/>
+        <line num="120" count="1" type="stmt"/>
+        <line num="156" count="270" type="stmt"/>
+        <line num="173" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="185" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="211" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="221" count="1" type="stmt"/>
+        <line num="241" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="246" count="3" type="stmt"/>
+        <line num="255" count="3" type="stmt"/>
+        <line num="258" count="0" type="stmt"/>
+        <line num="277" count="18" type="stmt"/>
+        <line num="297" count="44" type="stmt"/>
+        <line num="299" count="44" type="stmt"/>
+        <line num="300" count="44" type="cond" truecount="2" falsecount="0"/>
+        <line num="302" count="44" type="stmt"/>
+        <line num="303" count="44" type="stmt"/>
+        <line num="305" count="160" type="cond" truecount="8" falsecount="0"/>
+        <line num="311" count="160" type="cond" truecount="2" falsecount="0"/>
+        <line num="312" count="160" type="cond" truecount="2" falsecount="0"/>
+        <line num="316" count="44" type="stmt"/>
+        <line num="319" count="1" type="stmt"/>
+        <line num="330" count="176" type="stmt"/>
+        <line num="338" count="9" type="stmt"/>
+        <line num="352" count="484" type="stmt"/>
+        <line num="360" count="2" type="stmt"/>
+        <line num="379" count="137" type="stmt"/>
+        <line num="382" count="7" type="stmt"/>
+        <line num="424" count="25" type="cond" truecount="2" falsecount="0"/>
+        <line num="426" count="25" type="stmt"/>
+        <line num="429" count="2" type="stmt"/>
+        <line num="446" count="1" type="stmt"/>
+        <line num="473" count="100" type="stmt"/>
+        <line num="493" count="75" type="stmt"/>
+        <line num="503" count="2" type="stmt"/>
+        <line num="511" count="2" type="stmt"/>
+      </file>
+      <file name="monitoring.tsx" path="/home/runner/work/-.opt/-.opt/src/mobile/screens/monitoring.tsx">
+        <metrics statements="12" coveredstatements="12" conditionals="23" coveredconditionals="23" methods="11" coveredmethods="11"/>
+        <line num="6" count="20" type="stmt"/>
+        <line num="27" count="7" type="stmt"/>
+        <line num="30" count="1" type="stmt"/>
+        <line num="42" count="28" type="stmt"/>
+        <line num="85" count="168" type="stmt"/>
+        <line num="96" count="1" type="stmt"/>
+        <line num="113" count="13" type="cond" truecount="2" falsecount="0"/>
+        <line num="115" count="13" type="stmt"/>
+        <line num="118" count="2" type="stmt"/>
+        <line num="147" count="39" type="stmt"/>
+        <line num="164" count="39" type="stmt"/>
+        <line num="193" count="2" type="stmt"/>
+      </file>
+      <file name="notifications.tsx" path="/home/runner/work/-.opt/-.opt/src/mobile/screens/notifications.tsx">
+        <metrics statements="13" coveredstatements="13" conditionals="30" coveredconditionals="30" methods="11" coveredmethods="11"/>
+        <line num="13" count="42" type="stmt"/>
+        <line num="15" count="42" type="cond" truecount="2" falsecount="0"/>
+        <line num="17" count="42" type="stmt"/>
+        <line num="20" count="1" type="stmt"/>
+        <line num="31" count="1" type="stmt"/>
+        <line num="42" count="6" type="stmt"/>
+        <line num="58" count="24" type="stmt"/>
+        <line num="62" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="96" count="72" type="stmt"/>
+        <line num="100" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="135" count="144" type="stmt"/>
+        <line num="139" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="179" count="72" type="stmt"/>
+      </file>
+      <file name="rental.tsx" path="/home/runner/work/-.opt/-.opt/src/mobile/screens/rental.tsx">
+        <metrics statements="14" coveredstatements="14" conditionals="2" coveredconditionals="2" methods="14" coveredmethods="14"/>
+        <line num="18" count="19" type="stmt"/>
+        <line num="25" count="1" type="stmt"/>
+        <line num="45" count="1" type="stmt"/>
+        <line num="52" count="1" type="stmt"/>
+        <line num="69" count="11" type="stmt"/>
+        <line num="79" count="44" type="stmt"/>
+        <line num="97" count="11" type="stmt"/>
+        <line num="100" count="1" type="stmt"/>
+        <line num="133" count="33" type="stmt"/>
+        <line num="159" count="2" type="stmt"/>
+        <line num="174" count="12" type="stmt"/>
+        <line num="177" count="1" type="stmt"/>
+        <line num="225" count="36" type="stmt"/>
+        <line num="245" count="1" type="stmt"/>
+      </file>
+      <file name="support.tsx" path="/home/runner/work/-.opt/-.opt/src/mobile/screens/support.tsx">
+        <metrics statements="14" coveredstatements="14" conditionals="16" coveredconditionals="16" methods="5" coveredmethods="5"/>
+        <line num="13" count="18" type="cond" truecount="2" falsecount="0"/>
+        <line num="14" count="18" type="stmt"/>
+        <line num="15" count="18" type="stmt"/>
+        <line num="17" count="18" type="stmt"/>
+        <line num="18" count="3" type="stmt"/>
+        <line num="19" count="3" type="stmt"/>
+        <line num="20" count="3" type="stmt"/>
+        <line num="24" count="1" type="stmt"/>
+        <line num="26" count="2" type="stmt"/>
+        <line num="27" count="2" type="stmt"/>
+        <line num="35" count="18" type="stmt"/>
+        <line num="38" count="2" type="stmt"/>
+        <line num="81" count="36" type="stmt"/>
+        <line num="106" count="72" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>
