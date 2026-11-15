@@ -228,6 +228,24 @@ const equipmentVisuals: Record<string, string> = {
   Projector: "📽️",
 }
 
+const equipmentPhotos: Record<string, string> = {
+  "Cordless screwdriver / Impact driver":
+    "/assets/equipment-catalog/precision-screwdriver.png",
+  Drill: "/assets/equipment-catalog/drill.png",
+  "Hammer drill / Rotary hammer":
+    "/assets/equipment-catalog/perforator.png",
+  "Core drill": "/assets/equipment-catalog/diamond-drill-rig.png",
+  "Angle grinder": "/assets/equipment-catalog/metal-bandsaw.png",
+  "Circular saw": "/assets/equipment-catalog/electric-saw.png",
+  Jigsaw: "/assets/equipment-catalog/hand-saw.png",
+  Chainsaw: "/assets/equipment-catalog/chainsaw.png",
+  Sander: "/assets/equipment-catalog/sander.png",
+  "Demolition hammer / Jackhammer":
+    "/assets/equipment-catalog/demolition-axe.png",
+  Router: "/assets/equipment-catalog/milling-bits.png",
+  Generator: "/assets/equipment-catalog/generator.png",
+}
+
 const artworkPalettes = [
   ["#d9f3ff", "#83c9e8", "#1677a8"],
   ["#fff0dd", "#f6b575", "#bd7111"],
@@ -259,7 +277,9 @@ export const rentalCatalog = catalogGroups.flatMap((group) =>
       dailyUsdRange: group.dailyUsdRange,
       name,
       englishName,
-      image: createEquipmentArtwork(name, group.category, emoji, index),
+      image:
+        equipmentPhotos[englishName] ??
+        createEquipmentArtwork(name, group.category, emoji, index),
     }
   }),
 )

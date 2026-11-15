@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 const sameHash = (left, right) =>
   Buffer.from(left, "hex").length === Buffer.from(right, "hex").length &&
   crypto.timingSafeEqual(Buffer.from(left, "hex"), Buffer.from(right, "hex"));
+const hashToken = (token) => crypto.createHash("sha256").update(token).digest("hex");
 
 export const createPostgresAuthStore = (pool) => ({
   async initialize() {
@@ -147,6 +148,17 @@ export const createPostgresAuthStore = (pool) => ({
     );
   },
 
+  async findUserBySessionToken(token) {
+    const result = await pool.query(
+      `SELECT users.id, users.role
+       FROM auth_sessions
+       JOIN users ON users.id = auth_sessions.user_id
+       WHERE auth_sessions.token_hash = $1 AND auth_sessions.expires_at > NOW()`,
+      [hashToken(token)],
+    );
+    return result.rows[0] ?? null;
+  },
+
   async resetPasswordWithCode({ email, codeHash, passwordHash, passwordSalt }) {
     const client = await pool.connect();
     try {
@@ -258,6 +270,12 @@ export const createMemoryAuthStore = () => {
     },
     async createSession(tokenHash, userId, expiresAt) {
       sessions.set(tokenHash, { userId, expiresAt });
+    },
+    async findUserBySessionToken(token) {
+      const session = sessions.get(hashToken(token));
+      if (!session || session.expiresAt <= Date.now()) return null;
+      const user = users.get(session.userId);
+      return user ? { id: user.id, role: user.role } : null;
     },
     async resetPasswordWithCode({
       email,

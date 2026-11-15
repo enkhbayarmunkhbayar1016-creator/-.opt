@@ -1,5 +1,7 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import type { Screen } from "../data"
+import { api, type BookingInput } from "../../lib/api"
+import { GoogleMapPicker, type MapCoordinates } from "../GoogleMapPicker"
 import { Card, Header, MobilePage, StatusPill } from "../ui"
 
 const years = Array.from({ length: 10 }, (_, index) => 2026 + index)
@@ -29,10 +31,19 @@ const timeOptions = Array.from({ length: 48 }, (_, index) => {
 const formatDate = (date: Date) =>
   `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`
 
+const formatInputDate = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
+
 export function CalendarScreen({
   onNavigate,
+  onCreateBooking,
+  equipmentId,
+  sessionToken,
 }: {
   onNavigate: (screen: Screen) => void
+  onCreateBooking?: (booking: BookingInput) => Promise<void>
+  equipmentId?: string
+  sessionToken?: string
 }) {
   const [selectedYear, setSelectedYear] = useState(2026)
   const [selectedMonth, setSelectedMonth] = useState(9)
@@ -40,6 +51,13 @@ export function CalendarScreen({
   const [startTime, setStartTime] = useState("08:00")
   const [endTime, setEndTime] = useState("18:00")
   const [rentalDays, setRentalDays] = useState(1)
+  const [worksiteAddress, setWorksiteAddress] = useState("")
+  const [worksiteCoordinates, setWorksiteCoordinates] =
+    useState<MapCoordinates | null>(null)
+  const [submitError, setSubmitError] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [locationMessage, setLocationMessage] = useState("")
+  const [isSavingLocation, setIsSavingLocation] = useState(false)
 
   const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate()
   const firstWeekday = new Date(selectedYear, selectedMonth, 1).getDay()
@@ -51,6 +69,33 @@ export function CalendarScreen({
     [daysInMonth],
   )
 
+  useEffect(() => {
+    setLocationMessage("")
+    if (!sessionToken) {
+      setWorksiteAddress("")
+      setWorksiteCoordinates(null)
+      return
+    }
+
+    let active = true
+    api
+      .getWorksiteLocation(sessionToken)
+      .then(({ location }) => {
+        if (!active || !location) return
+        setWorksiteAddress(location.address)
+        setWorksiteCoordinates(location.coordinates)
+      })
+      .catch(() => {
+        if (active) {
+          setLocationMessage("Өмнө хадгалсан ажлын байршлыг ачаалж чадсангүй.")
+        }
+      })
+
+    return () => {
+      active = false
+    }
+  }, [sessionToken])
+
   const changeMonth = (offset: number) => {
     const date = new Date(selectedYear, selectedMonth + offset, 1)
     if (date.getFullYear() < firstYear || date.getFullYear() > lastYear) {
@@ -60,13 +105,18 @@ export function CalendarScreen({
     setSelectedYear(date.getFullYear())
     setSelectedMonth(date.getMonth())
     setSelectedDay((day) =>
-      Math.min(day, new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()),
+      Math.min(
+        day,
+        new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate(),
+      ),
     )
   }
 
   const changeYear = (year: number) => {
     setSelectedYear(year)
-    setSelectedDay((day) => Math.min(day, new Date(year, selectedMonth + 1, 0).getDate()))
+    setSelectedDay((day) =>
+      Math.min(day, new Date(year, selectedMonth + 1, 0).getDate()),
+    )
   }
 
   const changeSelectedMonth = (month: number) => {
@@ -74,6 +124,85 @@ export function CalendarScreen({
     setSelectedDay((day) =>
       Math.min(day, new Date(selectedYear, month + 1, 0).getDate()),
     )
+  }
+
+  const handleSaveLocation = async () => {
+    if (!sessionToken) {
+      setLocationMessage(
+        "Байршлаа хадгалахын тулд нэвтэрч эсвэл бүртгүүлнэ үү.",
+      )
+      return
+    }
+    if (!worksiteAddress.trim() || !worksiteCoordinates) {
+      setLocationMessage(
+        "Хаягаа сонгож, газрын зураг дээр pin-ээ тогтооно уу.",
+      )
+      return
+    }
+
+    setIsSavingLocation(true)
+    setLocationMessage("")
+    try {
+      const { location } = await api.saveWorksiteLocation(
+        {
+          address: worksiteAddress.trim(),
+          coordinates: worksiteCoordinates,
+        },
+        sessionToken,
+      )
+      setWorksiteAddress(location.address)
+      setWorksiteCoordinates(location.coordinates)
+      setLocationMessage("Ажлын байршлыг таны бүртгэлд хадгаллаа.")
+    } catch (error) {
+      setLocationMessage(
+        error instanceof Error ? error.message : "Байршлыг хадгалж чадсангүй.",
+      )
+    } finally {
+      setIsSavingLocation(false)
+    }
+  }
+
+  const handleBookingSubmit = async () => {
+    if (!onCreateBooking) {
+      setSubmitError("Захиалга илгээхийн тулд эхлээд нэвтэрнэ үү.")
+      return
+    }
+    if (!equipmentId) {
+      setSubmitError("Захиалах төхөөрөмжөө эхлээд сонгоно уу.")
+      return
+    }
+    if (!worksiteAddress.trim()) {
+      setSubmitError("Ажлын газрын хаягаа оруулна уу.")
+      return
+    }
+    if (!worksiteCoordinates) {
+      setSubmitError("Газрын зураг дээр pin-ээр ажлын байршлаа сонгоно уу.")
+      return
+    }
+
+    setIsSubmitting(true)
+    setSubmitError("")
+    const payload: BookingInput = {
+      equipmentId,
+      startDate: formatInputDate(selectedDate),
+      endDate: formatInputDate(endDate),
+      startTime,
+      endTime,
+      rentalDays,
+      worksiteAddress: worksiteAddress.trim(),
+      coordinates: worksiteCoordinates,
+      notes: "",
+    }
+
+    try {
+      await onCreateBooking(payload)
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : "Захиалга хадгалж чадсангүй.",
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -167,7 +296,11 @@ export function CalendarScreen({
                   type="button"
                 >
                   <span className="sr-only">
-                    {weekdays[new Date(selectedYear, selectedMonth, day).getDay()]}
+                    {
+                      weekdays[
+                        new Date(selectedYear, selectedMonth, day).getDay()
+                      ]
+                    }
                   </span>
                   <span className="block font-['Roboto_Mono:Bold'] text-[11px] font-bold">
                     {String(day).padStart(2, "0")}
@@ -247,20 +380,73 @@ export function CalendarScreen({
             Захиалгын мэдээлэл
           </h2>
           <div className="mt-3 space-y-2">
-            <div className="rounded-lg border border-[#dce4e8] p-3 text-[10px]">
-              Монкон ХХК · Нарны зам, Блок B
-            </div>
-            <div className="rounded-lg border border-[#dce4e8] p-3 text-[10px] text-[#71808a]">
-              Ажлын тайлбар, тэмдэглэл...
-            </div>
+            <GoogleMapPicker
+              address={worksiteAddress}
+              apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? ""}
+              coordinates={worksiteCoordinates}
+              onAddressChange={(address) => {
+                setWorksiteAddress(address)
+                setWorksiteCoordinates(null)
+              }}
+              onSelect={(coordinates, address) => {
+                setWorksiteCoordinates(coordinates)
+                if (address) setWorksiteAddress(address)
+              }}
+            />
+            {worksiteCoordinates && (
+              <p className="text-[9px] text-[#42515d]">
+                Pin сонгосон: {worksiteCoordinates.latitude.toFixed(6)},{" "}
+                {worksiteCoordinates.longitude.toFixed(6)}
+              </p>
+            )}
+            {worksiteCoordinates && (
+              <a
+                className="inline-block text-[9px] font-bold text-[#1677a8] underline"
+                href={`https://maps.google.com/?q=${worksiteCoordinates.latitude},${worksiteCoordinates.longitude}`}
+                rel="noreferrer"
+                target="_blank"
+              >
+                Сонгосон pin-ийг Google Maps дээр нээх
+              </a>
+            )}
+            {sessionToken && (
+              <button
+                className="w-full rounded-lg border border-[#1677a8] px-3 py-2 text-[10px] font-bold text-[#1677a8] disabled:opacity-50"
+                disabled={isSavingLocation || !worksiteCoordinates}
+                onClick={() => void handleSaveLocation()}
+                type="button"
+              >
+                {isSavingLocation
+                  ? "Байршил хадгалж байна..."
+                  : "Ажлын байршлыг хадгалах"}
+              </button>
+            )}
+            {locationMessage && (
+              <p
+                aria-live="polite"
+                className={`text-[9px] ${
+                  locationMessage.includes("хадгаллаа")
+                    ? "text-[#19724b]"
+                    : "text-[#b42318]"
+                }`}
+              >
+                {locationMessage}
+              </p>
+            )}
           </div>
         </Card>
+        {submitError && (
+          <p aria-live="polite" className="text-[10px] text-[#b42318]">
+            {submitError}
+          </p>
+        )}
         <button
           className="mt-auto h-[48px] rounded-[9px] bg-[#1677a8] font-['Inter:Bold'] text-[12px] font-bold text-white"
-          onClick={() => onNavigate("checkout")}
+          disabled={isSubmitting}
+          onClick={() => void handleBookingSubmit()}
           type="button"
         >
-          Захиалга баталгаажуулах
+          {isSubmitting ? "Захиалга хадгалж байна..." : "Захиалга илгээх"}
         </button>
       </div>
     </MobilePage>

@@ -1,4 +1,5 @@
 import type { Screen } from "../data"
+import type { Booking } from "../../lib/api"
 import {
   Card,
   Header,
@@ -91,8 +92,10 @@ function Checklist({ title, items }: ChecklistProps) {
 
 export function CheckoutScreen({
   onNavigate,
+  booking,
 }: {
   onNavigate: (screen: Screen) => void
+  booking?: Booking
 }) {
   return (
     <MobilePage current="checkout" onNavigate={onNavigate}>
@@ -102,6 +105,37 @@ export function CheckoutScreen({
         title="Check-out · Олголт"
       />
       <div className="flex flex-1 flex-col gap-3 p-3">
+        {booking && (
+          <Card className="space-y-2 border border-[#b8dfc7] bg-[#f0faf4] p-3">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-[11px] font-bold text-[#19724b]">
+                Захиалгын хүсэлт хадгалагдлаа
+              </h2>
+              <StatusPill tone="green">ХҮСЭЛТ</StatusPill>
+            </div>
+            <p className="break-all text-[8px] text-[#5d6e79]">
+              Захиалгын дугаар: {booking.id}
+            </p>
+            <p className="text-[9px]">Төхөөрөмж: {booking.equipmentId}</p>
+            <p className="text-[9px]">Байршил: {booking.worksiteAddress}</p>
+            <p className="text-[8px] text-[#5d6e79]">
+              Координат: {booking.coordinates.latitude.toFixed(6)},{" "}
+              {booking.coordinates.longitude.toFixed(6)} · {booking.startDate} –{" "}
+              {booking.endDate}
+            </p>
+            {booking.notes && (
+              <p className="text-[9px]">Тайлбар: {booking.notes}</p>
+            )}
+            <a
+              className="inline-block text-[9px] font-bold text-[#1677a8] underline"
+              href={`https://maps.google.com/?q=${booking.coordinates.latitude},${booking.coordinates.longitude}`}
+              rel="noreferrer"
+              target="_blank"
+            >
+              Захиалгын pin-ийг Google Maps дээр нээх
+            </a>
+          </Card>
+        )}
         <Card className="flex items-center gap-3 p-3">
           <span className="flex size-10 items-center justify-center rounded-lg bg-[#e2f1f7]">
             <Icon className="size-5" src={icons.truck} />

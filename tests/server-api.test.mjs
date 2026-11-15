@@ -117,7 +117,32 @@ describe("Ops API", { concurrency: false }, () => {
       assert.ok(item.location)
       assert.ok(item.telemetry)
       assert.equal(typeof item.live, "boolean")
+      assert.equal(item.telemetry.temperature, null)
+      assert.equal(item.telemetry.vibration, null)
+      assert.equal(item.telemetry.rpm, null)
+      assert.equal(item.live, false)
+      assert.equal(item.photoUrl, null)
     }
+  })
+
+  it("does not return fabricated mixer temperature or monitoring alerts", async () => {
+    const equipment = await requestJson("/api/equipment/MIX-4993")
+    const alerts = await requestJson("/api/alerts")
+
+    assert.equal(equipment.data.telemetry.temperature, null)
+    assert.deepEqual(alerts.data, [])
+  })
+
+  it("requires authentication for equipment photo uploads", async () => {
+    const response = await fetch(`${baseUrl}/api/equipment/GEN-0162/photo`, {
+      method: "POST",
+      headers: { "Content-Type": "image/png" },
+      body: Buffer.from("not-an-image"),
+    })
+    const data = await response.json()
+
+    assert.equal(response.status, 401)
+    assert.equal(data.message, "Нэвтэрч зураг оруулна уу.")
   })
 
   // Жагсаалтад буй төхөөрөмж бүрийн дэлгэрэнгүй API тухайн бичлэгийг яг буцаана.
@@ -205,7 +230,7 @@ describe("Ops API", { concurrency: false }, () => {
 
     assert.equal(response.status, 200)
     assert.equal(new Set(ids).size, ids.length)
-    assert.equal(data.length, 4)
+    assert.equal(data.length, 3)
     for (const notification of data) {
       assert.ok(notification.title)
       assert.ok(notification.meta)

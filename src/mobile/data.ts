@@ -1,12 +1,12 @@
 import type { DashboardResponse } from "../lib/api"
 
-export type Screen = "login" | "home" | "profile" | "equipment" | "detail" | "calendar" | "scanner" | "checkout" | "checkin" | "telemetry" | "anomaly" | "support" | "notifications" | "security"
+export type Screen = "login" | "home" | "profile" | "equipment" | "detail" | "calendar" | "map" | "scanner" | "checkout" | "checkin" | "telemetry" | "anomaly" | "support" | "notifications" | "security"
 
 export const fallbackDashboard: DashboardResponse = {
   summary: {
     totalEquipment: 128,
     rentedToday: 6,
-    alerts: 4,
+    alerts: 0,
     syncSecondsAgo: "8 сек өмнө",
     siteName: "Улаанбаатар төв",
   },
@@ -22,8 +22,8 @@ export const fallbackDashboard: DashboardResponse = {
       assignee: "Б. Бат",
       tenant: "Хөх Тэнгэр ХХК",
       due: "10-р сарын 18",
-      telemetry: { vibration: "4.82", temperature: "78.6", rpm: "1,482" },
-      live: true,
+      telemetry: { vibration: null, temperature: null, rpm: null },
+      live: false,
     },
     {
       id: "GEN-0162",
@@ -36,43 +36,26 @@ export const fallbackDashboard: DashboardResponse = {
       assignee: "С. Уран",
       tenant: "Монкон ХХК",
       due: "10-р сарын 14",
-      telemetry: { vibration: "2.58", temperature: "64.2", rpm: "840" },
-      live: true,
+      telemetry: { vibration: null, temperature: null, rpm: null },
+      live: false,
     },
     {
       id: "MIX-4993",
       name: "Бетон зуурагч 8м³",
       category: "Барилгын тоног төхөөрөмж",
       model: "MIX-8 PRO",
-      status: "Анхаарах",
+      status: "Түрээстэй",
       meta: "MIX-4993",
       location: "Талбай 12 · Блок C",
       assignee: "Н. Баяр",
       tenant: "Улаанбаатар бетон",
       due: "10-р сарын 16",
-      telemetry: { vibration: "8.41", temperature: "96.2", rpm: "1,824" },
-      live: true,
+      telemetry: { vibration: null, temperature: null, rpm: null },
+      live: false,
     },
   ],
-  alerts: [
-    {
-      id: "A-8842",
-      title: "Бетон зуурагчийн температур",
-      equipmentId: "MIX-4993",
-      risk: "93.4%",
-      location: "Талбай 12",
-      severity: "high",
-      description: "Температур 96.2°C · автомат мониторинг идэвхтэй",
-    },
-  ],
+  alerts: [],
   notifications: [
-    {
-      id: "n-1",
-      title: "Хөдөлгүүрийн эрсдэл 18 мин",
-      meta: "MIX-4993 · Талбай 12",
-      type: "alert",
-      createdAt: "Өнөөдөр · 12:43",
-    },
     {
       id: "n-2",
       title: "Хугацаа 2 цагийн дараа дуусна",

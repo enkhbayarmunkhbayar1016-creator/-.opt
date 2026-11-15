@@ -108,12 +108,13 @@ export function BottomNav({
   }[] = [
     { id: "home", label: "Нүүр", icon: icons.home },
     { id: "equipment", label: "Төхөөрөмж", icon: icons.truck },
+    { id: "map", label: "Газрын зураг", icon: icons.mapPin },
     { id: "scanner", label: "QR", icon: icons.qr },
     { id: "notifications", label: "Мэдэгдэл", icon: icons.bell },
   ]
 
   return (
-    <nav className="sticky bottom-0 z-20 grid h-[66px] grid-cols-4 border-t border-[#dce4e8] bg-white px-2 md:order-first md:top-0 md:bottom-auto md:h-14 md:border-t-0 md:border-b md:px-4">
+    <nav className="sticky bottom-0 z-20 grid h-[66px] grid-cols-5 border-t border-[#dce4e8] bg-white px-1 md:order-first md:top-0 md:bottom-auto md:h-14 md:border-t-0 md:border-b md:px-4">
       {items.map((item) => {
         const active =
           current === item.id ||

@@ -12,13 +12,14 @@ describe("email-code authentication flow", () => {
   let server;
   let baseUrl;
   let sentEmail;
+  let authStore;
 
   before(async () => {
     const app = express();
     app.use(express.json());
-    const store = createMemoryAuthStore();
+    authStore = createMemoryAuthStore();
     registerAuthRoutes(app, {
-      store,
+      store: authStore,
       sendVerificationCode: async (email, code, purpose) => {
         sentEmail = { email, code, purpose };
       },
@@ -81,6 +82,10 @@ describe("email-code authentication flow", () => {
     });
     assert.equal(login.response.status, 200);
     assert.equal(login.data.user.id, registration.data.user.id);
+    assert.deepEqual(
+      await authStore.findUserBySessionToken(login.data.session.token),
+      { id: registration.data.user.id, role: "renter" },
+    );
 
     const unknownEmail = await post("/api/auth/forgot-password", {
       email: "unknown@example.com",

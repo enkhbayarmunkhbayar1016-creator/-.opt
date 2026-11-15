@@ -7,6 +7,7 @@ import { rentalCatalog } from "../src/rentalCatalog"
 
 afterEach(() => {
   cleanup()
+  vi.unstubAllEnvs()
   window.localStorage.removeItem("rent-theme")
   delete document.documentElement.dataset.theme
 })
@@ -18,6 +19,28 @@ describe("App routes", () => {
 
     expect(artwork).toHaveLength(rentalCatalog.length)
     expect(new Set(artwork).size).toBe(rentalCatalog.length)
+  })
+
+  it("uses supplied local photos for equipment types with matching images", () => {
+    const localPhotoNames = [
+      "Халдаг шураг чангалагч",
+      "Цахилгаан өрмийн машин",
+      "Цохилтот өрөм / перфоратор",
+      "Алмаазан өрмийн машин",
+      "Өнцөгт ган хөрөө / болгарка",
+      "Цахилгаан хөрөө",
+      "Шүдтэй хөрөө",
+      "Гинжит хөрөө",
+      "Хавтгай үрэгч / зүлгүүрийн машин",
+      "Нураагч алх / цахилгаан сүх",
+      "Хэв үүсгэгч / фрез",
+      "Цахилгаан үүсгүүр / генератор",
+    ]
+
+    for (const name of localPhotoNames) {
+      const item = rentalCatalog.find((entry) => entry.name === name)
+      expect(item?.image, name).toMatch(/^\/assets\/equipment-catalog\//)
+    }
   })
 
   it("toggles and persists night mode across the website and login", async () => {
@@ -56,7 +79,9 @@ describe("App routes", () => {
       screen.getByRole("heading", { name: "Тоног төхөөрөмжийн бүх төрөл" }),
     ).toBeInTheDocument()
     expect(screen.getAllByText(/Жишиг: ₮/).length).toBeGreaterThan(0)
-    expect(screen.getByText(/нэвтрэхгүйгээр харах боломжтой/)).toBeInTheDocument()
+    expect(
+      screen.getByText(/нэвтрэхгүйгээр харах боломжтой/),
+    ).toBeInTheDocument()
     expect(screen.queryByText(/\$/)).not.toBeInTheDocument()
 
     await user.selectOptions(
@@ -87,6 +112,69 @@ describe("App routes", () => {
     expect(
       screen.queryByRole("button", { name: "npm security" }),
     ).not.toBeInTheDocument()
+  })
+
+  it("sends the worksite step through renter registration to the map", async () => {
+    const user = userEvent.setup()
+    vi.stubEnv("VITE_GOOGLE_MAPS_API_KEY", "")
+    window.history.replaceState(null, "", "/#calendar")
+    vi.spyOn(api, "register").mockResolvedValue({
+      message: "Баталгаажуулах код илгээлээ.",
+    })
+    vi.spyOn(api, "verifyRegistrationCode").mockResolvedValue({
+      message: "Бүртгэл үүслээ.",
+      user: {
+        id: "renter-1",
+        role: "renter",
+        phone: "99112233",
+        email: "renter@example.com",
+        name: "Renter",
+        company: "Хувь хэрэглэгч",
+      },
+      session: {
+        token: "renter-token",
+        role: "renter",
+        expiresAt: "2026-11-16T10:00:00.000Z",
+      },
+    })
+    vi.spyOn(api, "getDashboard").mockResolvedValue({
+      summary: {
+        totalEquipment: 1,
+        rentedToday: 0,
+        alerts: 0,
+        syncSecondsAgo: "now",
+        siteName: "Example",
+      },
+      equipment: [],
+      alerts: [],
+      notifications: [],
+      supportTeam: [],
+    })
+    vi.spyOn(api, "getWorksiteLocation").mockResolvedValue({ location: null })
+    render(<App />)
+
+    await user.click(
+      screen.getByRole("button", { name: "01 Ажил, байршлаа бидэнд хэлнэ үү" }),
+    )
+    await user.click(screen.getByRole("button", { name: "Бүртгүүлэх" }))
+    expect(
+      screen.getByRole("heading", { name: "Шинэ бүртгэл" }),
+    ).toBeInTheDocument()
+
+    await user.type(screen.getByLabelText("Нэр"), "Renter")
+    await user.type(screen.getByLabelText("Утасны дугаар"), "99112233")
+    await user.type(screen.getByLabelText("Имэйл хаяг"), "renter@example.com")
+    await user.type(screen.getByLabelText("ШИНЭ НУУЦ ҮГ"), "secure-password")
+    await user.click(screen.getByRole("button", { name: "Бүртгэл үүсгэх" }))
+    await screen.findByText("Баталгаажуулах код илгээлээ.")
+    await user.type(screen.getByLabelText("Баталгаажуулах код"), "123456")
+    await user.click(screen.getByRole("button", { name: "Код баталгаажуулах" }))
+
+    expect(
+      await screen.findByRole("heading", { name: "Захиалгын хуанли" }),
+    ).toBeInTheDocument()
+    expect(api.getWorksiteLocation).toHaveBeenCalledWith("renter-token")
+    expect(screen.getByText(/VITE_GOOGLE_MAPS_API_KEY/)).toBeInTheDocument()
   })
 
   // Веб порталаас нэвтэрч, нүүр хуудас руу буцаж байгааг шалгана.

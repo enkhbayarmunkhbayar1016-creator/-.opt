@@ -15,6 +15,7 @@ import {
   type AlertItem,
   type DashboardResponse,
   type UserRole,
+  type WorksiteLocation,
 } from "../src/lib/api"
 
 const renderAtHash = (route: string) => {
@@ -41,8 +42,8 @@ const equipmentCatalog: DashboardResponse["equipment"] = [
     assignee: "Б. Бат",
     tenant: "Хөх Тэнгэр ХХК",
     due: "10-р сарын 18",
-    telemetry: { vibration: "4.82", temperature: "78.6", rpm: "1,482" },
-    live: true,
+    telemetry: { vibration: null, temperature: null, rpm: null },
+    live: false,
   },
   {
     id: "GEN-0162",
@@ -54,21 +55,21 @@ const equipmentCatalog: DashboardResponse["equipment"] = [
     assignee: "С. Уран",
     tenant: "Монкон ХХК",
     due: "10-р сарын 14",
-    telemetry: { vibration: "2.58", temperature: "64.2", rpm: "840" },
-    live: true,
+    telemetry: { vibration: null, temperature: null, rpm: null },
+    live: false,
   },
   {
     id: "MIX-4993",
     name: "Бетон зуурагч 8м³",
     model: "MIX-8 PRO",
-    status: "Анхаарах",
+    status: "Түрээстэй",
     meta: "MIX-4993",
     location: "Талбай 12 · Блок C",
     assignee: "Н. Баяр",
     tenant: "Улаанбаатар бетон",
     due: "10-р сарын 16",
-    telemetry: { vibration: "8.41", temperature: "96.2", rpm: "1,824" },
-    live: true,
+    telemetry: { vibration: null, temperature: null, rpm: null },
+    live: false,
   },
   {
     id: "EXC-0914",
@@ -80,7 +81,7 @@ const equipmentCatalog: DashboardResponse["equipment"] = [
     assignee: "Г. Дэлгэр",
     tenant: "Говь зам ХХК",
     due: "10-р сарын 09",
-    telemetry: { vibration: "3.75", temperature: "72.4", rpm: "1,180" },
+    telemetry: { vibration: null, temperature: null, rpm: null },
     live: false,
   },
   {
@@ -93,7 +94,7 @@ const equipmentCatalog: DashboardResponse["equipment"] = [
     assignee: "Б. Бөх",
     tenant: "Улаанбаатар логистик",
     due: "10-р сарын 20",
-    telemetry: { vibration: "0.86", temperature: "32.1", rpm: "0" },
+    telemetry: { vibration: null, temperature: null, rpm: null },
     live: false,
   },
 ]
@@ -102,30 +103,13 @@ const authenticatedDashboard: DashboardResponse = {
   summary: {
     totalEquipment: 47,
     rentedToday: 6,
-    alerts: 4,
+    alerts: 0,
     syncSecondsAgo: "8 сек өмнө",
     siteName: "Улаанбаатар төв",
   },
   equipment: equipmentCatalog,
-  alerts: [
-    {
-      id: "A-8842",
-      title: "Бетон зуурагчийн температур",
-      equipmentId: "MIX-4993",
-      risk: "93.4%",
-      location: "Талбай 12",
-      severity: "high",
-      description: "Температур 96.2°C · автомат мониторинг идэвхтэй",
-    },
-  ],
+  alerts: [],
   notifications: [
-    {
-      id: "n-1",
-      title: "Хөдөлгүүрийн эрсдэл 18 мин",
-      meta: "MIX-4993 · Талбай 12",
-      type: "alert",
-      createdAt: "Өнөөдөр · 12:43",
-    },
     {
       id: "n-2",
       title: "Хугацаа 2 цагийн дараа дуусна",
@@ -145,10 +129,18 @@ const renderAuthenticatedRoute = async (
   dashboard: DashboardResponse = authenticatedDashboard,
   role: UserRole = "manager",
   onBackToWebsite?: () => void,
+  worksiteLocation: WorksiteLocation | null = {
+    address: "Сүхбаатарын талбай",
+    coordinates: { latitude: 47.9184, longitude: 106.9177 },
+  },
 ) => {
   const user = userEvent.setup()
   const roleLabel =
-    role === "renter" ? "Түрээслэгч" : role === "fixer" ? "Засварчин" : "Менежер"
+    role === "renter"
+      ? "Түрээслэгч"
+      : role === "fixer"
+        ? "Засварчин"
+        : "Менежер"
   vi.spyOn(api, "login").mockResolvedValue({
     message: "Welcome",
     user: {
@@ -166,6 +158,16 @@ const renderAuthenticatedRoute = async (
     },
   })
   vi.spyOn(api, "getDashboard").mockResolvedValue(dashboard)
+  if (role === "renter") {
+    vi.spyOn(api, "getWorksiteLocation").mockResolvedValue({
+      location: worksiteLocation,
+    })
+    if (!worksiteLocation) {
+      vi.spyOn(api, "getEquipmentMapLocations").mockResolvedValue({
+        locations: [],
+      })
+    }
+  }
   window.history.replaceState(null, "", "/#login")
   render(<MobileOpsApp onBackToWebsite={onBackToWebsite} />)
   if (role !== "renter") {
@@ -188,13 +190,18 @@ const renderAuthenticatedRoute = async (
   await user.click(
     screen.getByRole("button", {
       name:
-        role === "fixer"
-          ? "Засварчнаар нэвтрэх"
-          : `${roleLabel}ээр нэвтрэх`,
+        role === "fixer" ? "Засварчнаар нэвтрэх" : `${roleLabel}ээр нэвтрэх`,
     }),
   )
-  await screen.findByRole("heading", { name: `Өдрийн мэнд, ${roleLabel}` })
-  await screen.findByText(String(dashboard.summary.totalEquipment))
+  await screen.findByRole("heading", {
+    name:
+      role === "renter" && !worksiteLocation
+        ? "Газрын зураг"
+        : `Өдрийн мэнд, ${roleLabel}`,
+  })
+  if (!(role === "renter" && !worksiteLocation)) {
+    await screen.findByText(String(dashboard.summary.totalEquipment))
+  }
   if (route !== "home") {
     window.history.replaceState(null, "", `/#${route}`)
     fireEvent(window, new HashChangeEvent("hashchange"))
@@ -208,10 +215,31 @@ const renderAuthenticatedEquipment = () => renderAuthenticatedRoute("equipment")
 afterEach(() => {
   cleanup()
   window.history.replaceState(null, "", "/")
+  vi.unstubAllEnvs()
 })
 
 // Аппын дэлгэцүүд, хэрэглэгчийн урсгал болон үйлдлийн үр дүнг шалгана.
 describe("MobileOpsApp screens", () => {
+  it("takes renters without a saved worksite to the map first", async () => {
+    await renderAuthenticatedRoute(
+      "map",
+      authenticatedDashboard,
+      "renter",
+      undefined,
+      null,
+    )
+
+    expect(window.location.hash).toBe("#map")
+    expect(
+      screen.getByRole("heading", { name: "Таны ажиллах газрын байршил" }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", {
+        name: "Миний ажиллах газрын байршлыг хадгалах",
+      }),
+    ).toBeDisabled()
+  })
+
   // Hash зам бүр тохирох дэлгэцээ харуулж байгааг шалгана.
   it.each([
     ["home", "Өдрийн мэнд, Менежер"],
@@ -221,8 +249,8 @@ describe("MobileOpsApp screens", () => {
     ["scanner", "QR код уншуулах"],
     ["checkout", "Check-out · Олголт"],
     ["checkin", "Check-in · Буцаалт"],
-    ["telemetry", "Live telemetry"],
-    ["anomaly", "Anomaly alert"],
+    ["telemetry", "Телеметр"],
+    ["anomaly", "Анхааруулга"],
     ["support", "Тусламжийн хүсэлт"],
     ["notifications", "Мэдэгдэл ба түүх"],
   ])("renders the %s screen", (route, heading) => {
@@ -251,6 +279,25 @@ describe("MobileOpsApp screens", () => {
     expect(window.location.hash).toBe("#equipment")
   })
 
+  it("opens the equipment map from the renter navigation", async () => {
+    const user = await renderAuthenticatedRoute(
+      "home",
+      authenticatedDashboard,
+      "renter",
+    )
+    vi.spyOn(api, "getEquipmentMapLocations").mockResolvedValue({
+      locations: [],
+    })
+
+    await user.click(screen.getByRole("button", { name: "Газрын зураг" }))
+
+    expect(window.location.hash).toBe("#map")
+    expect(
+      await screen.findByRole("heading", { name: "Газрын зураг" }),
+    ).toBeInTheDocument()
+    expect(api.getEquipmentMapLocations).toHaveBeenCalledWith("session-token")
+  })
+
   // Идэвхтэй цэсийг дахин сонгоход одоогийн дэлгэц хэвээр үлдэнэ.
   it("keeps the current route when the active navigation item is selected", async () => {
     const user = userEvent.setup()
@@ -264,38 +311,29 @@ describe("MobileOpsApp screens", () => {
     ).toBeInTheDocument()
   })
 
-  // Анхааруулгаас тусламж руу шилжих, буцах болон системээс гарахыг шалгана.
-  it("handles home alerts, support escalation, and signing out", async () => {
+  // Бодит мэдрэгчийн өгөгдөлгүй үед хуурамч alert үүсгэхгүй.
+  it("shows a no-sensor-data state on the home screen and anomaly route", async () => {
     const user = userEvent.setup()
     renderAtHash("home")
 
-    await user.click(screen.getByRole("button", { name: "Буцах" }))
-    await user.click(
-      screen.getByRole("button", { name: /Бетон зуурагчийн температур/ }),
-    )
+    expect(screen.getByText("Мэдрэгчийн өгөгдөл алга")).toBeInTheDocument()
+    expect(screen.queryByText("96.2°C")).not.toBeInTheDocument()
+    expect(screen.queryByText("93.4%")).not.toBeInTheDocument()
+
+    window.history.replaceState(null, "", "/#anomaly")
+    fireEvent(window, new HashChangeEvent("hashchange"))
     expect(
-      screen.getByRole("heading", { name: "Anomaly alert" }),
+      screen.getByRole("heading", { name: "Анхааруулга" }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText("Одоогоор бодит анхааруулга алга"),
     ).toBeInTheDocument()
 
     await user.click(
-      screen.getByRole("button", { name: "Хариу арга хэмжээ авах" }),
+      screen.getByRole("button", { name: "Нүүр хуудас руу буцах" }),
     )
-    expect(
-      screen.getByRole("heading", { name: "Тусламжийн хүсэлт" }),
-    ).toBeInTheDocument()
-
-    await user.click(screen.getByRole("button", { name: "Буцах" }))
-    expect(
-      screen.getByRole("heading", { name: "Anomaly alert" }),
-    ).toBeInTheDocument()
-    await user.click(screen.getByRole("button", { name: "Буцах" }))
     expect(
       screen.getByRole("heading", { name: "Өдрийн мэнд, Менежер" }),
-    ).toBeInTheDocument()
-
-    await user.click(screen.getByRole("button", { name: "Гарах" }))
-    expect(
-      screen.getByRole("heading", { name: "Түрээслэгчийн нэвтрэх" }),
     ).toBeInTheDocument()
   })
 
@@ -321,8 +359,12 @@ describe("MobileOpsApp screens", () => {
     renderAtHash("login")
 
     await user.click(screen.getByRole("button", { name: "Ажилтан нэвтрэх" }))
-    await user.click(screen.getByRole("button", { name: /Засварчин Төхөөрөмж/ }))
-    await user.click(screen.getByRole("button", { name: "Засварчнаар нэвтрэх" }))
+    await user.click(
+      screen.getByRole("button", { name: /Засварчин Төхөөрөмж/ }),
+    )
+    await user.click(
+      screen.getByRole("button", { name: "Засварчнаар нэвтрэх" }),
+    )
     expect(
       await screen.findByRole("heading", { name: "Өдрийн мэнд, Засварчин" }),
     ).toBeInTheDocument()
@@ -392,6 +434,14 @@ describe("MobileOpsApp screens", () => {
         },
       })
       vi.spyOn(api, "getDashboard").mockRejectedValue(new Error("offline"))
+      if (role === "renter") {
+        vi.spyOn(api, "getWorksiteLocation").mockResolvedValue({
+          location: {
+            address: "Сүхбаатарын талбай",
+            coordinates: { latitude: 47.9184, longitude: 106.9177 },
+          },
+        })
+      }
       renderAtHash("login")
 
       if (role !== "renter") {
@@ -489,34 +539,24 @@ describe("MobileOpsApp screens", () => {
       screen.getByRole("heading", { name: "Өрмийн машин D45" }),
     ).toBeInTheDocument()
     await user.click(
-      screen.getByRole("button", { name: "Live telemetry дэлгэрэнгүй" }),
+      screen.getByRole("button", { name: "Телеметрийн дэлгэрэнгүй" }),
     )
     expect(
-      screen.getByRole("heading", { name: "Live telemetry" }),
+      screen.getByRole("heading", { name: "Телеметр" }),
     ).toBeInTheDocument()
-    await user.click(
-      screen.getByRole("button", { name: "ANOMALY · шинэ эрсдэл илэрлээ" }),
-    )
-    expect(
-      screen.getByRole("heading", { name: "Anomaly alert" }),
-    ).toBeInTheDocument()
-    await user.click(
-      screen.getByRole("button", { name: "Хариу арга хэмжээ авах" }),
-    )
-    expect(
-      screen.getByRole("heading", { name: "Тусламжийн хүсэлт" }),
-    ).toBeInTheDocument()
-    await user.click(screen.getByRole("button", { name: "Буцах" }))
+    expect(screen.getByText("Мэдрэгчийн өгөгдөл алга")).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "Буцах" }))
     expect(
-      screen.getByRole("heading", { name: "Өдрийн мэнд, Менежер" }),
+      screen.getByRole("heading", { name: "Өрмийн машин D45" }),
     ).toBeInTheDocument()
 
     await user.click(screen.getByRole("button", { name: "Төхөөрөмж" }))
     await user.click(screen.getByRole("button", { name: "Түрээстэй 76" }))
     expect(screen.getByText("Өрмийн машин D45")).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "Анхаарах 9" }))
-    expect(screen.getByText("Бетон зуурагч 8м³")).toBeInTheDocument()
+    expect(
+      screen.getByText("Энэ ангилал, төлөвт тохирох төхөөрөмж алга."),
+    ).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "Бүгд 128" }))
     await user.click(
       screen.getByRole("button", { name: /Өрмийн машин D45 DRL-UB-0247/ }),
@@ -527,15 +567,51 @@ describe("MobileOpsApp screens", () => {
     expect(
       screen.getByRole("heading", { name: "Захиалгын хуанли" }),
     ).toBeInTheDocument()
-    await user.click(
-      screen.getByRole("button", { name: "Захиалга баталгаажуулах" }),
-    )
-    await user.click(
-      screen.getByRole("button", { name: "Check-out баталгаажуулах" }),
-    )
+    await user.click(screen.getByRole("button", { name: "Захиалга илгээх" }))
+    expect(
+      screen.getByText("Ажлын газрын хаягаа оруулна уу."),
+    ).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Буцах" }))
     expect(
       screen.getByRole("heading", { name: "Өрмийн машин D45" }),
     ).toBeInTheDocument()
+  })
+
+  it("saves, reapplies, and clears the signed-in user's equipment search history", async () => {
+    const history = [
+      { query: "Генератор", searchedAt: "2026-04-02T10:00:00.000Z" },
+    ]
+    const getHistory = vi
+      .spyOn(api, "getSearchHistory")
+      .mockResolvedValue({ items: history })
+    const saveHistory = vi
+      .spyOn(api, "saveSearchHistory")
+      .mockResolvedValue({ items: [history[0]] })
+    const clearHistory = vi
+      .spyOn(api, "clearSearchHistory")
+      .mockResolvedValue({ ok: true })
+    const user = await renderAuthenticatedRoute("equipment")
+
+    expect(
+      await screen.findByRole("button", { name: "Генератор" }),
+    ).toBeInTheDocument()
+    expect(getHistory).toHaveBeenCalledWith("session-token")
+
+    await user.click(screen.getByRole("button", { name: "Генератор" }))
+    expect(screen.getByText("Генератор 150 кВА")).toBeInTheDocument()
+    expect(screen.queryByText("Өрмийн машин D45")).not.toBeInTheDocument()
+
+    await user.clear(screen.getByLabelText("Төхөөрөмж хайх"))
+    await user.type(screen.getByLabelText("Төхөөрөмж хайх"), "D45")
+    await user.click(screen.getByRole("button", { name: "Хайх" }))
+    expect(saveHistory).toHaveBeenCalledWith("D45", "session-token")
+    expect(screen.getByText("Өрмийн машин D45")).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Түүх цэвэрлэх" }))
+    await waitFor(() =>
+      expect(clearHistory).toHaveBeenCalledWith("session-token"),
+    )
+    expect(screen.getByText("Хайлтын түүх хоосон байна.")).toBeInTheDocument()
   })
 
   // URL-ийн hash өөрчлөлт болон мэдэгдлээс очих дэлгэц зөв ажиллахыг шалгана.
@@ -551,14 +627,14 @@ describe("MobileOpsApp screens", () => {
 
     await user.click(screen.getByRole("button", { name: "Мэдэгдэл · 7" }))
     await user.click(
-      screen.getByRole("button", { name: /Хөдөлгүүрийн эрсдэл/ }),
+      screen.getByRole("button", { name: /Хугацаа 2 цагийн дараа дуусна/ }),
     )
     expect(
-      screen.getByRole("heading", { name: "Anomaly alert" }),
+      screen.getByRole("heading", { name: "Өрмийн машин D45" }),
     ).toBeInTheDocument()
   })
 
-  // Захиалга, олголт, буцаалт болон telemetry дэлгэцүүдээс буцах урсгалыг шалгана.
+  // Хуанли, check-out, check-in болон telemetry дэлгэцүүдийн буцах урсгалыг шалгана.
   it("returns from the calendar, checkout, check-in, and telemetry screens", async () => {
     const user = userEvent.setup()
     renderAtHash("calendar")
@@ -568,7 +644,7 @@ describe("MobileOpsApp screens", () => {
       screen.getByRole("heading", { name: "Өрмийн машин D45" }),
     ).toBeInTheDocument()
     await user.click(
-      screen.getByRole("button", { name: "Live telemetry дэлгэрэнгүй" }),
+      screen.getByRole("button", { name: "Телеметрийн дэлгэрэнгүй" }),
     )
     await user.click(screen.getByRole("button", { name: "Буцах" }))
     expect(
@@ -578,16 +654,12 @@ describe("MobileOpsApp screens", () => {
     await user.click(
       screen.getByRole("button", { name: "Захиалгын хугацаа сонгох" }),
     )
-    await user.click(
-      screen.getByRole("button", { name: "Захиалга баталгаажуулах" }),
-    )
-    await user.click(screen.getByRole("button", { name: "Буцах" }))
     expect(
       screen.getByRole("heading", { name: "Захиалгын хуанли" }),
     ).toBeInTheDocument()
-    await user.click(
-      screen.getByRole("button", { name: "Захиалга баталгаажуулах" }),
-    )
+
+    cleanup()
+    renderAtHash("checkout")
     await user.click(
       screen.getByRole("button", { name: "Check-out баталгаажуулах" }),
     )
@@ -659,7 +731,7 @@ describe("MobileOpsApp screens", () => {
       screen.getByRole("button", { name: "Генератор 150 кВА GEN-0162 Бэлэн" }),
     )
     expect(
-      screen.getByRole("heading", { name: "Өрмийн машин D45" }),
+      screen.getByRole("heading", { name: "Генератор 150 кВА" }),
     ).toBeInTheDocument()
   })
 
@@ -687,20 +759,33 @@ describe("MobileOpsApp screens", () => {
     ).toBeInTheDocument()
   })
 
-  // Хуанлид өдөр сонгоод олголтын дараагийн алхамд шилжинэ.
-  it("updates the calendar selection and continues to checkout", async () => {
+  // Ажлын газрын pin сонгохгүйгээр захиалга илгээх боломжгүй.
+  it("requires a worksite address and selected map pin before submitting", async () => {
     const user = userEvent.setup()
     renderAtHash("calendar")
 
     await user.click(screen.getByRole("button", { name: /БЯМ\s*10/ }))
     expect(screen.getByText("2026.10.10")).toBeInTheDocument()
 
-    await user.click(
-      screen.getByRole("button", { name: "Захиалга баталгаажуулах" }),
-    )
+    await user.click(screen.getByRole("button", { name: "Захиалга илгээх" }))
     expect(
-      screen.getByRole("heading", { name: "Check-out · Олголт" }),
+      screen.getByText("Ажлын газрын хаягаа оруулна уу."),
     ).toBeInTheDocument()
+  })
+
+  it("prompts for a Google Maps key and keeps the address editable", async () => {
+    const user = userEvent.setup()
+    vi.stubEnv("VITE_GOOGLE_MAPS_API_KEY", "")
+    renderAtHash("calendar")
+
+    const address = screen.getByLabelText("Ажлын газрын хаяг")
+    await user.type(address, "Сүхбаатарын талбай")
+    expect(
+      screen.getByText(
+        "Google Maps-ийн интерактив pin ашиглахын тулд VITE_GOOGLE_MAPS_API_KEY тохируулна уу.",
+      ),
+    ).toBeInTheDocument()
+    expect(address).toHaveValue("Сүхбаатарын талбай")
   })
 
   // Өөр өдөр сонгоход түрээсийн эхлэх болон дуусах огноо шинэчлэгдэнэ.
@@ -934,6 +1019,9 @@ describe("MobileOpsApp screens", () => {
   ] as const)(
     "shows database profile details for the %s account",
     async (role, roleLabel) => {
+      if (role === "renter") {
+        vi.stubEnv("VITE_GOOGLE_MAPS_API_KEY", "test-map-key")
+      }
       const user = await renderAuthenticatedRoute(
         "home",
         authenticatedDashboard,
@@ -945,13 +1033,33 @@ describe("MobileOpsApp screens", () => {
       expect(
         screen.getByRole("heading", { name: "Миний профайл" }),
       ).toBeInTheDocument()
-      expect(screen.getByText("Бүртгэлийн төрөл").parentElement).toHaveTextContent(
-        roleLabel,
-      )
+      expect(
+        screen.getByText("Бүртгэлийн төрөл").parentElement,
+      ).toHaveTextContent(roleLabel)
       expect(screen.getByText("Example Co")).toBeInTheDocument()
       expect(screen.getByText("99128044")).toBeInTheDocument()
       expect(screen.getByText("test@example.com")).toBeInTheDocument()
       expect(screen.getByText(`${role}-99128044`)).toBeInTheDocument()
+      if (role === "renter") {
+        expect(
+          await screen.findByText("Сүхбаатарын талбай"),
+        ).toBeInTheDocument()
+        expect(screen.getByText("47.918400, 106.917700")).toBeInTheDocument()
+        expect(
+          screen.getByRole("application", {
+            name: "Таны ажиллах газрын зураг",
+          }),
+        ).toBeInTheDocument()
+        expect(
+          screen.getByRole("link", { name: "Google Maps дээр нээх" }),
+        ).toHaveAttribute("href", "https://maps.google.com/?q=47.9184,106.9177")
+        expect(
+          screen.getByRole("button", {
+            name: "Ажлын байршлыг өөрчлөх",
+          }),
+        ).toBeInTheDocument()
+        expect(api.getWorksiteLocation).toHaveBeenCalledWith("session-token")
+      }
     },
   )
 
@@ -970,6 +1078,14 @@ describe("MobileOpsApp screens", () => {
     )
 
     expect(onBackToWebsite).toHaveBeenCalledOnce()
+    const websiteButton = screen.getByRole("button", {
+      name: "Вэбсайтын нүүр хуудас",
+    })
+    const backButton = screen.getByRole("button", { name: "Буцах" })
+    expect(
+      websiteButton.compareDocumentPosition(backButton) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
   })
 
   // Төхөөрөмжийн ангилал бүрд зөв тооны, зөв нэртэй бичлэг харагдана.
@@ -986,7 +1102,7 @@ describe("MobileOpsApp screens", () => {
     ],
     ["Бэлэн 30", ["Генератор 150 кВА", "Гар багаж / багц"]],
     ["Түрээстэй 76", ["Өрмийн машин D45"]],
-    ["Анхаарах 9", ["Бетон зуурагч 8м³", "Бага оврын экскаватор"]],
+    ["Анхаарах 9", ["Бага оврын экскаватор"]],
   ])(
     "shows the matching equipment for filter %s",
     async (filter, expectedItems) => {
@@ -1011,7 +1127,7 @@ describe("MobileOpsApp screens", () => {
   it.each([
     ["Өрмийн машин D45", "DRL-UB-0247", "Түрээстэй"],
     ["Генератор 150 кВА", "GEN-0162", "Бэлэн"],
-    ["Бетон зуурагч 8м³", "MIX-4993", "Анхаарах"],
+    ["Бетон зуурагч 8м³", "MIX-4993", "Түрээстэй"],
     ["Бага оврын экскаватор", "EXC-0914", "Засварт"],
     ["Гар багаж / багц", "TLS-1318", "Бэлэн"],
   ])("opens equipment details from the %s row", async (name, id, status) => {
@@ -1021,10 +1137,36 @@ describe("MobileOpsApp screens", () => {
       screen.getByRole("button", { name: `${name} ${id} ${status}` }),
     )
 
-    expect(
-      screen.getByRole("heading", { name: "Өрмийн машин D45" }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name })).toBeInTheDocument()
     expect(window.location.hash).toBe("#detail")
+  })
+
+  it("uploads a photo for the selected equipment and refreshes its detail image", async () => {
+    const user = await renderAuthenticatedEquipment()
+    const photoUrl = "/api/equipment/GEN-0162/photo"
+    const upload = vi
+      .spyOn(api, "uploadEquipmentPhoto")
+      .mockResolvedValue({ ok: true, equipmentId: "GEN-0162", photoUrl })
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "Генератор 150 кВА GEN-0162 Бэлэн",
+      }),
+    )
+    expect(
+      screen.getByRole("heading", { name: "Генератор 150 кВА" }),
+    ).toBeInTheDocument()
+
+    const file = new File(["image-bytes"], "generator.png", {
+      type: "image/png",
+    })
+    await user.upload(screen.getByLabelText("Төхөөрөмжийн зураг сонгох"), file)
+
+    expect(await screen.findByText("Зураг хадгалагдлаа.")).toBeInTheDocument()
+    expect(upload).toHaveBeenCalledWith("GEN-0162", file, "session-token")
+    expect(
+      screen.getByRole("img", { name: "Генератор 150 кВА" }),
+    ).toHaveAttribute("src", photoUrl)
   })
 
   // Хуанлийн долоо хоногийн бүх өдөр эхлэх, дуусах огноог зөв тооцно.
@@ -1054,10 +1196,7 @@ describe("MobileOpsApp screens", () => {
   )
 
   // Мэдэгдлийн төрөл бүр тохирох дэлгэрэнгүй дэлгэцэд хүргэдэг.
-  it.each([
-    ["Хөдөлгүүрийн эрсдэл 18 мин", "Anomaly alert", "anomaly"],
-    ["Хугацаа 2 цагийн дараа дуусна", "Өрмийн машин D45", "detail"],
-  ])(
+  it.each([["Хугацаа 2 цагийн дараа дуусна", "Өрмийн машин D45", "detail"]])(
     "opens the correct destination for notification %s",
     async (title, heading, route) => {
       const user = userEvent.setup()
@@ -1122,7 +1261,7 @@ describe("MobileOpsApp screens", () => {
       screen.getByRole("heading", { name: "Өрмийн машин D45" }),
     ).toBeInTheDocument()
     expect(screen.getByText("Atlas Copco D45")).toBeInTheDocument()
-    expect(screen.getByText("MQTT LIVE")).toBeInTheDocument()
+    expect(screen.getByText("ӨГӨГДӨЛ АЛГА")).toBeInTheDocument()
   })
 
   // Зарим дэлгэрэнгүй талбар дутсан үед UI утга бүрийн нөөц текстийг харуулна.
@@ -1153,25 +1292,26 @@ describe("MobileOpsApp screens", () => {
     expect(screen.getByText("Б. Бат")).toBeInTheDocument()
     expect(screen.getByText("Хөх Тэнгэр ХХК")).toBeInTheDocument()
     expect(screen.getByText("10-р сарын 18")).toBeInTheDocument()
-    expect(screen.getByText("4.82")).toBeInTheDocument()
-    expect(screen.getByText("78.6")).toBeInTheDocument()
-    expect(screen.getByText("1,482")).toBeInTheDocument()
-    expect(screen.getByText("OFFLINE")).toBeInTheDocument()
+    expect(
+      screen.getByText("Мэдрэгчийн уншилт ирээгүй байна."),
+    ).toBeInTheDocument()
+    expect(screen.getByText("ӨГӨГДӨЛ АЛГА")).toBeInTheDocument()
   })
 
-  // Анхааруулга хоосон үед дэлгэцэд урьдчилан тохируулсан эрсдэлийн мэдээлэл байна.
-  it("uses fallback alert details when the dashboard has no alerts", async () => {
+  // Анхааруулга хоосон үед зохиомол температур, эрсдэл харуулахгүй.
+  it("shows a no-alert state when the dashboard has no alerts", async () => {
     const noAlertsDashboard = { ...authenticatedDashboard, alerts: [] }
     await renderAuthenticatedRoute("anomaly", noAlertsDashboard)
 
-    expect(screen.getByText("Бетон зуурагчийн температур")).toBeInTheDocument()
-    expect(screen.getByText("93.4%")).toBeInTheDocument()
-    expect(screen.getByText("Талбай 12")).toBeInTheDocument()
-    expect(screen.getByText("MIX-4993")).toBeInTheDocument()
+    expect(
+      screen.getByText("Одоогоор бодит анхааруулга алга"),
+    ).toBeInTheDocument()
+    expect(screen.queryByText("96.2")).not.toBeInTheDocument()
+    expect(screen.queryByText("93.4%")).not.toBeInTheDocument()
   })
 
-  // Alert-ийн талбарууд null үед дэлгэцэд талбар бүрийн нөөц утгыг харуулна.
-  it("uses fallback values for null alert fields", async () => {
+  // Alert-ийн талбарууд null үед худал утга нэмж харуулахгүй.
+  it("does not invent values for null alert fields", async () => {
     const sparseAlert = {
       ...authenticatedDashboard.alerts[0],
       title: null,
@@ -1185,10 +1325,9 @@ describe("MobileOpsApp screens", () => {
     }
     await renderAuthenticatedRoute("anomaly", sparseAlertsDashboard)
 
-    expect(screen.getByText("Бетон зуурагч “B4”")).toBeInTheDocument()
-    expect(screen.getByText("93.4%")).toBeInTheDocument()
-    expect(screen.getByText("ББ · Талбай 12")).toBeInTheDocument()
-    expect(screen.getByText("eq_429_788")).toBeInTheDocument()
+    expect(screen.queryByText("93.4%")).not.toBeInTheDocument()
+    expect(screen.queryByText("ББ · Талбай 12")).not.toBeInTheDocument()
+    expect(screen.queryByText("eq_429_788")).not.toBeInTheDocument()
   })
 
   // Хариу өгөх багийн мэдээлэл null үед нөөц багийг харуулна.
@@ -1213,8 +1352,6 @@ describe("MobileOpsApp screens", () => {
     } as unknown as DashboardResponse
     await renderAuthenticatedRoute("notifications", noNotifications)
 
-    expect(screen.getByText("2 мэдэгдэл · 2 шинэ")).toBeInTheDocument()
-    expect(screen.getByText("Хөдөлгүүрийн эрсдэл 18 мин")).toBeInTheDocument()
     expect(
       screen.getByText("Хугацаа 2 цагийн дараа дуусна"),
     ).toBeInTheDocument()

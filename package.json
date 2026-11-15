@@ -11,7 +11,7 @@
     "start": "node server/index.mjs",
     "preview": "vite preview",
     "format": "oxfmt",
-    "test": "node --test tests/server-api.test.mjs tests/auth.test.mjs && vitest run",
+    "test": "node --test tests/server-api.test.mjs tests/auth.test.mjs tests/equipment-photos.test.mjs tests/equipment-locations.test.mjs tests/search-history.test.mjs tests/bookings.test.mjs && vitest run",
     "test:unit": "vitest run",
     "test:coverage": "vitest run --coverage"
   },

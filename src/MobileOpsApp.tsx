@@ -1,6 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react"
 import {
   api,
+  type Booking,
+  type BookingInput,
   type DashboardResponse,
   type User,
   type UserRole,
@@ -14,6 +16,7 @@ import {
   ProfileScreen,
 } from "./mobile/screens/core"
 import { CalendarScreen } from "./mobile/screens/calendar"
+import { EquipmentMapScreen } from "./mobile/screens/map"
 import {
   CheckinScreen,
   CheckoutScreen,
@@ -31,6 +34,7 @@ const screenIds: Screen[] = [
   "equipment",
   "detail",
   "calendar",
+  "map",
   "scanner",
   "checkout",
   "checkin",
@@ -54,10 +58,16 @@ function getScreenFromHash(): Screen {
   return screenIds.includes(hash) ? hash : "login"
 }
 
-export default function MobileOpsApp({ onBackToWebsite }: {
+export default function MobileOpsApp({
+  onBackToWebsite,
+  startBookingFlow = false,
+}: {
   onBackToWebsite?: () => void
+  startBookingFlow?: boolean
 } = {}) {
-  const [screen, setScreen] = useState<Screen>(getScreenFromHash)
+  const [screen, setScreen] = useState<Screen>(() =>
+    startBookingFlow ? "login" : getScreenFromHash(),
+  )
   const [session, setSession] = useState<{
     message: string
     user: User
@@ -69,6 +79,8 @@ export default function MobileOpsApp({ onBackToWebsite }: {
   } | null>(null)
   const [dashboard, setDashboard] =
     useState<DashboardResponse>(fallbackDashboard)
+  const [selectedEquipmentId, setSelectedEquipmentId] = useState<string>()
+  const [submittedBooking, setSubmittedBooking] = useState<Booking>()
 
   useEffect(() => {
     const handleHashChange = () => setScreen(getScreenFromHash())
@@ -121,14 +133,66 @@ export default function MobileOpsApp({ onBackToWebsite }: {
     }
   }) => {
     setSession(result)
-    navigate("home")
+    if (
+      result.user.role === "renter" ||
+      result.user.role === "tenant" ||
+      result.user.role === "employee"
+    ) {
+      if (startBookingFlow) {
+        navigate("calendar")
+        return
+      }
+
+      void api
+        .getWorksiteLocation(result.session.token)
+        .then(({ location }) => {
+          navigate(location ? "home" : "map")
+        })
+        .catch(() => {
+          navigate("map")
+        })
+      return
+    }
+    navigate(startBookingFlow ? "calendar" : "home")
   }
 
   const handleSignOut = () => {
     setSession(null)
+    setSelectedEquipmentId(undefined)
     setDashboard(fallbackDashboard)
     window.location.hash = "login"
     setScreen("login")
+  }
+
+  const handleEquipmentPhotoUpload = async (
+    equipmentId: string,
+    file: File,
+  ) => {
+    if (!session) {
+      throw new Error("Зураг оруулахын тулд нэвтэрнэ үү.")
+    }
+
+    const result = await api.uploadEquipmentPhoto(
+      equipmentId,
+      file,
+      session.session.token,
+    )
+    setDashboard((current) => ({
+      ...current,
+      equipment: current.equipment.map((item) =>
+        item.id === equipmentId ? { ...item, photoUrl: result.photoUrl } : item,
+      ),
+    }))
+  }
+
+  const handleCreateBooking = async (payload: BookingInput) => {
+    if (!session) {
+      throw new Error("Захиалга илгээхийн тулд эхлээд нэвтэрнэ үү.")
+    }
+
+    const result = await api.createBooking(payload, session.session.token)
+    setSubmittedBooking(result.booking)
+    navigate("checkout")
   }
 
   if (screen === "login") {
@@ -166,17 +230,57 @@ export default function MobileOpsApp({ onBackToWebsite }: {
       />
     ),
     profile: session ? (
-      <ProfileScreen user={session.user} onNavigate={navigate} />
+      <ProfileScreen
+        onNavigate={navigate}
+        sessionToken={session.session.token}
+        user={session.user}
+      />
     ) : (
       <MobileLogin onBackToWebsite={onBackToWebsite} onLogin={handleLogin} />
     ),
-    equipment: <EquipmentScreen dashboard={dashboard} onNavigate={navigate} />,
-    detail: <DetailScreen dashboard={dashboard} onNavigate={navigate} />,
-    calendar: <CalendarScreen onNavigate={navigate} />,
+    equipment: (
+      <EquipmentScreen
+        dashboard={dashboard}
+        onNavigate={navigate}
+        onSelectEquipment={setSelectedEquipmentId}
+        userToken={session?.session.token}
+      />
+    ),
+    detail: (
+      <DetailScreen
+        dashboard={dashboard}
+        equipmentId={selectedEquipmentId}
+        onNavigate={navigate}
+        onUploadPhoto={handleEquipmentPhotoUpload}
+      />
+    ),
+    calendar: (
+      <CalendarScreen
+        equipmentId={
+          selectedEquipmentId ??
+          (dashboard.equipment ?? fallbackDashboard.equipment)[0]?.id
+        }
+        onCreateBooking={handleCreateBooking}
+        onNavigate={navigate}
+        sessionToken={session?.session.token}
+      />
+    ),
+    map: session ? (
+      <EquipmentMapScreen
+        equipment={dashboard.equipment}
+        onNavigate={navigate}
+        role={session.user.role}
+        sessionToken={session.session.token}
+      />
+    ) : (
+      <MobileLogin onBackToWebsite={onBackToWebsite} onLogin={handleLogin} />
+    ),
     scanner: <ScannerScreen onNavigate={navigate} />,
-    checkout: <CheckoutScreen onNavigate={navigate} />,
+    checkout: (
+      <CheckoutScreen booking={submittedBooking} onNavigate={navigate} />
+    ),
     checkin: <CheckinScreen onNavigate={navigate} />,
-    telemetry: <TelemetryScreen onNavigate={navigate} />,
+    telemetry: <TelemetryScreen dashboard={dashboard} onNavigate={navigate} />,
     anomaly: <AnomalyScreen dashboard={dashboard} onNavigate={navigate} />,
     support: <SupportScreen dashboard={dashboard} onNavigate={navigate} />,
     notifications: (

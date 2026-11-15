@@ -47,6 +47,7 @@ export default function App() {
   const [route, setRoute] = useState<"website" | "catalog" | "operations">(
     "website",
   )
+  const [startBookingFlow, setStartBookingFlow] = useState(false)
 
   useEffect(() => {
     const theme = isDarkMode ? "dark" : "light"
@@ -55,11 +56,21 @@ export default function App() {
   }, [isDarkMode])
 
   const toggleTheme = () => setIsDarkMode((current) => !current)
+  const beginBookingFlow = () => {
+    setStartBookingFlow(true)
+    setRoute("operations")
+  }
 
   if (route === "operations") {
     return (
       <div className={`app-theme ${isDarkMode ? "dark-mode" : ""}`}>
-        <MobileOpsApp onBackToWebsite={() => setRoute("website")} />
+        <MobileOpsApp
+          onBackToWebsite={() => {
+            setStartBookingFlow(false)
+            setRoute("website")
+          }}
+          startBookingFlow={startBookingFlow}
+        />
         <ThemeToggle isDarkMode={isDarkMode} onToggle={toggleTheme} />
       </div>
     )
@@ -71,7 +82,10 @@ export default function App() {
         initialCategory={catalogCategory}
         isDarkMode={isDarkMode}
         onBackToWebsite={() => setRoute("website")}
-        onLogin={() => setRoute("operations")}
+        onLogin={() => {
+          setStartBookingFlow(false)
+          setRoute("operations")
+        }}
         onToggleTheme={toggleTheme}
       />
     )
@@ -79,7 +93,9 @@ export default function App() {
 
   return (
     <div
-      className={`app-theme min-h-screen bg-[#f3f1ec] text-[#101820] ${isDarkMode ? "dark-mode" : ""}`}
+      className={`app-theme min-h-screen bg-[#f3f1ec] text-[#101820] ${
+        isDarkMode ? "dark-mode" : ""
+      }`}
     >
       <header className="mx-auto max-w-7xl px-4 pt-5">
         <div className="flex items-center justify-between rounded-full bg-[#0a0d12] px-5 py-3 text-white shadow-[0_18px_40px_rgba(10,13,18,0.18)]">
@@ -127,7 +143,10 @@ export default function App() {
             </button>
             <button
               className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10"
-              onClick={() => setRoute("operations")}
+              onClick={() => {
+                setStartBookingFlow(false)
+                setRoute("operations")
+              }}
               type="button"
             >
               Нэвтрэх
@@ -168,7 +187,7 @@ export default function App() {
               <div className="mt-7 flex flex-wrap items-center gap-3">
                 <button
                   className="rounded-full bg-[#f5b91d] px-5 py-3 text-sm font-bold text-[#0c1117] transition hover:brightness-105"
-                  onClick={() => setRoute("operations")}
+                  onClick={beginBookingFlow}
                   type="button"
                 >
                   Тоног захиалах
@@ -293,25 +312,41 @@ export default function App() {
                 ["01", "Ажил, байршлаа бидэнд хэлнэ үү"],
                 ["02", "Зөв тоног төхөөрөмжийг сонгоно"],
                 ["03", "Бид талбайд хүргэж, дэмжлэг үзүүлнэ"],
-              ].map(([step, text]) => (
-                <div
-                  key={step}
-                  className="flex gap-4 rounded-2xl border border-white/10 bg-white/5 p-3"
-                >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f5b91d] text-sm font-black text-[#101820]">
-                    {step}
-                  </span>
-                  <p className="flex items-center text-sm text-slate-100">
-                    {text}
-                  </p>
-                </div>
-              ))}
+              ].map(([step, text]) =>
+                step === "01" ? (
+                  <button
+                    className="flex w-full gap-4 rounded-2xl border border-white/10 bg-white/5 p-3 text-left transition hover:bg-white/10"
+                    key={step}
+                    onClick={beginBookingFlow}
+                    type="button"
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f5b91d] text-sm font-black text-[#101820]">
+                      {step}
+                    </span>
+                    <p className="flex items-center text-sm text-slate-100">
+                      {text}
+                    </p>
+                  </button>
+                ) : (
+                  <div
+                    key={step}
+                    className="flex gap-4 rounded-2xl border border-white/10 bg-white/5 p-3"
+                  >
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f5b91d] text-sm font-black text-[#101820]">
+                      {step}
+                    </span>
+                    <p className="flex items-center text-sm text-slate-100">
+                      {text}
+                    </p>
+                  </div>
+                ),
+              )}
             </div>
             <button
               className="mt-6 w-full rounded-full bg-[#f5b91d] px-4 py-3 text-sm font-bold text-[#101820]"
               onClick={() => {
                 setCatalogCategory("Бүгд")
-                setRoute("catalog")
+                beginBookingFlow()
               }}
               type="button"
             >
