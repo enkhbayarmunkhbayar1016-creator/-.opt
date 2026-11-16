@@ -23,7 +23,7 @@ const validateLocation = (body) => {
 
 export const registerEquipmentLocationRoutes = (
   app,
-  { pool, authStore, equipment, testMemoryStore = false },
+  { pool, authStore, equipment, memoryStore = false },
 ) => {
   const requireUser = requireAuthenticatedUser(authStore)
   const memoryLocations = new Map()
@@ -46,7 +46,7 @@ export const registerEquipmentLocationRoutes = (
           ),
         })
       }
-      if (testMemoryStore) {
+      if (memoryStore) {
         return res.json({ locations: [...memoryLocations.values()] })
       }
       return res
@@ -99,7 +99,7 @@ export const registerEquipmentLocationRoutes = (
             ...fields,
             coordinates: { latitude, longitude },
           }
-        } else if (testMemoryStore) {
+        } else if (memoryStore) {
           location = {
             equipmentId: item.id,
             ...validated.location,

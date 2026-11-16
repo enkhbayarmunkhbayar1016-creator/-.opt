@@ -4,8 +4,8 @@ A React + Vite frontend paired with an Express API for an equipment operations d
 
 - website dashboard for desktop
 - phone/mobile operations flow
-- role-based login backed by persistent PostgreSQL accounts
-- Gmail email-code verification for registration and password recovery
+- role-based login with PostgreSQL accounts in production and in-memory accounts locally
+- email-code verification for registration and password recovery
 - mock dashboard data API
 
 ## Tech stack
@@ -24,19 +24,28 @@ A React + Vite frontend paired with an Express API for an equipment operations d
    ```bash
    pnpm install
    ```
-2. Copy `.env.example` to `.env`, then set the Supabase `DATABASE_URL`, a random `OTP_SECRET` with at least 32 characters, and Gmail SMTP credentials. Use a Google App Password for `SMTP_PASS`, not your normal Gmail password.
-3. Start the app in development mode:
+2. Start the app in development mode:
    ```bash
    pnpm dev
    ```
-4. Open the frontend at the Vite URL shown in the terminal, usually:
+   Local development uses in-memory accounts and data, so it does not require PostgreSQL
+   or SMTP credentials. Without SMTP settings, registration and password-recovery codes
+   are returned to the local UI automatically. To receive email locally, add `SMTP_USER`
+   and `SMTP_PASS` to `.env` (for Gmail, use an App Password); the local server will send
+   the code and will not expose it in the API response. Local data is cleared when the
+   API restarts. Do not expose the development server to untrusted networks.
+3. Open the frontend at the Vite URL shown in the terminal, usually:
    ```bash
    http://localhost:8443
    ```
-5. The Express API runs on:
+4. The Express API runs on:
    ```bash
    http://localhost:4000
    ```
+
+For persistent accounts and email delivery, configure `.env` using `.env.example`
+and run the production server with `npm start`. Set a random `OTP_SECRET` with at
+least 32 characters and use a Google App Password for `SMTP_PASS`.
 
 ## Production build
 

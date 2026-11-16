@@ -38,7 +38,7 @@ describe("Search history API", { concurrency: false }, () => {
         },
       },
       pool: null,
-      testMemoryStore: true,
+      memoryStore: true,
     })
     server = app.listen(0, "127.0.0.1")
     await new Promise((resolve) => server.once("listening", resolve))

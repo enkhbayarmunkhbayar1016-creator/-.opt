@@ -74,7 +74,7 @@ const validateBooking = (body, equipment) => {
 
 export const registerBookingRoutes = (
   app,
-  { pool, authStore, equipment, testMemoryStore = false },
+  { pool, authStore, equipment, memoryStore = false },
 ) => {
   const requireUser = requireAuthenticatedUser(authStore)
   const memoryBookings = new Map()
@@ -102,7 +102,7 @@ export const registerBookingRoutes = (
             : null,
         })
       }
-      if (testMemoryStore) {
+      if (memoryStore) {
         return res.json({
           location: memoryLocations.get(req.authenticatedUser.id) ?? null,
         })
@@ -170,7 +170,7 @@ export const registerBookingRoutes = (
           },
         })
       }
-      if (testMemoryStore) {
+      if (memoryStore) {
         memoryLocations.set(req.authenticatedUser.id, location)
         return res.json({ location })
       }
@@ -221,7 +221,7 @@ export const registerBookingRoutes = (
           ],
         )
         booking.createdAt = saved.rows[0].createdAt
-      } else if (testMemoryStore) {
+      } else if (memoryStore) {
         const bookings = memoryBookings.get(booking.userId) ?? []
         bookings.unshift(booking)
         memoryBookings.set(booking.userId, bookings)
@@ -258,7 +258,7 @@ export const registerBookingRoutes = (
           })),
         })
       }
-      if (testMemoryStore) {
+      if (memoryStore) {
         return res.json({
           items: memoryBookings.get(req.authenticatedUser.id) ?? [],
         })

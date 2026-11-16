@@ -52,6 +52,11 @@ type AuthResponse = {
   session: Session
 }
 
+type VerificationCodeResponse = {
+  message: string
+  developmentCode?: string
+}
+
 type RegistrationCodeInput = {
   email: string
   code: string
@@ -173,7 +178,7 @@ export const api = {
     email: string
     password: string
   }) =>
-    request<{ message: string }>("/auth/register/request-code", {
+    request<VerificationCodeResponse>("/auth/register/request-code", {
       method: "POST",
       body: JSON.stringify(payload),
     }),
@@ -188,7 +193,7 @@ export const api = {
       body: JSON.stringify(payload),
     }),
   forgotPassword: (payload: { email: string }) =>
-    request<{ message: string }>("/auth/forgot-password", {
+    request<VerificationCodeResponse>("/auth/forgot-password", {
       method: "POST",
       body: JSON.stringify(payload),
     }),

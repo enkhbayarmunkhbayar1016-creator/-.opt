@@ -20,6 +20,7 @@ describe("email-code authentication flow", () => {
     authStore = createMemoryAuthStore();
     registerAuthRoutes(app, {
       store: authStore,
+      exposeVerificationCode: true,
       sendVerificationCode: async (email, code, purpose) => {
         sentEmail = { email, code, purpose };
       },
@@ -59,6 +60,7 @@ describe("email-code authentication flow", () => {
     assert.equal(sentEmail.email, "test@example.com");
     assert.equal(sentEmail.purpose, "register");
     assert.match(sentEmail.code, /^\d{6}$/);
+    assert.equal(registrationRequest.data.developmentCode, sentEmail.code);
 
     const registration = await post("/api/auth/register/verify-code", {
       email: "test@example.com",
@@ -94,9 +96,11 @@ describe("email-code authentication flow", () => {
       email: "TEST@example.com",
     });
     assert.equal(unknownEmail.response.status, 200);
-    assert.deepEqual(forgotPassword.data, unknownEmail.data);
+    assert.equal(unknownEmail.data.developmentCode, undefined);
+    assert.equal(forgotPassword.data.message, unknownEmail.data.message);
     assert.equal(sentEmail.email, "test@example.com");
     assert.equal(sentEmail.purpose, "reset-password");
+    assert.equal(forgotPassword.data.developmentCode, sentEmail.code);
 
     const resetCode = sentEmail.code;
     const reset = await post("/api/auth/reset-password", {

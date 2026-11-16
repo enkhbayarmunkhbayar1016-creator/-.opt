@@ -92,12 +92,15 @@ describe("MobileLogin", () => {
     ).toBeInTheDocument()
   })
 
-  it("registers an individual, verifies the emailed code, and signs in", async () => {
+  it("uses the local registration code to verify and sign in", async () => {
     const user = userEvent.setup()
     const onLogin = vi.fn()
     const register = vi
       .spyOn(api, "register")
-      .mockResolvedValue({ message: "Check your email" })
+      .mockResolvedValue({
+        message: "Check your email",
+        developmentCode: "123456",
+      })
     const verify = vi
       .spyOn(api, "verifyRegistrationCode")
       .mockResolvedValue(loginResult)
@@ -118,7 +121,7 @@ describe("MobileLogin", () => {
       email: "test@example.com",
       password: "secure-password",
     })
-    await user.type(screen.getByLabelText("Баталгаажуулах код"), "123456")
+    expect(screen.getByLabelText("Баталгаажуулах код")).toHaveValue("123456")
     await user.click(
       screen.getByRole("button", { name: "Код баталгаажуулах" }),
     )
@@ -169,7 +172,10 @@ describe("MobileLogin", () => {
     const user = userEvent.setup()
     const forgotPassword = vi
       .spyOn(api, "forgotPassword")
-      .mockResolvedValue({ message: "Code sent" })
+      .mockResolvedValue({
+        message: "Code sent",
+        developmentCode: "654321",
+      })
     const resetPassword = vi
       .spyOn(api, "resetPassword")
       .mockResolvedValue({ message: "Password changed" })
@@ -183,7 +189,7 @@ describe("MobileLogin", () => {
 
     expect(await screen.findByText("Code sent")).toBeInTheDocument()
     expect(forgotPassword).toHaveBeenCalledWith({ email: "test@example.com" })
-    await user.type(screen.getByLabelText("Баталгаажуулах код"), "654321")
+    expect(screen.getByLabelText("Баталгаажуулах код")).toHaveValue("654321")
     await user.type(screen.getByLabelText("Шинэ нууц үг"), "new-password")
     await user.click(screen.getByRole("button", { name: "Нууц үг шинэчлэх" }))
 

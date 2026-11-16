@@ -17,7 +17,7 @@ describe("equipment location routes", () => {
     app.use(express.json())
     registerEquipmentLocationRoutes(app, {
       equipment,
-      testMemoryStore: true,
+      memoryStore: true,
       authStore: {
         async findUserBySessionToken(token) {
           if (token === managerToken)

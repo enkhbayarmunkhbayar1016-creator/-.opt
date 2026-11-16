@@ -31,12 +31,17 @@ const port = Number(process.env.PORT || 4000)
 const distPath = path.join(__dirname, "..", "dist")
 const testMemoryStore =
   process.env.NODE_ENV === "test" && process.env.AUTH_TEST_MEMORY === "true"
-const pool = testMemoryStore
+const localMemoryStore = process.env.LOCAL_AUTH_MEMORY === "true"
+const memoryStore = testMemoryStore || localMemoryStore
+if (localMemoryStore && !process.env.OTP_SECRET) {
+  process.env.OTP_SECRET = "local-development-only-otp-secret-not-for-production"
+}
+const pool = memoryStore
   ? null
   : process.env.DATABASE_URL
     ? new pg.Pool({ connectionString: process.env.DATABASE_URL })
     : null
-const authStore = testMemoryStore
+const authStore = memoryStore
   ? createMemoryAuthStore()
   : pool
     ? createPostgresAuthStore(pool)
@@ -122,15 +127,15 @@ const { equipmentWithPhotoUrls } = registerEquipmentPhotoRoutes(app, {
   equipment,
   pool,
   authStore,
-  testMemoryStore,
+  memoryStore,
 })
-registerSearchHistoryRoutes(app, { pool, authStore, testMemoryStore })
-registerBookingRoutes(app, { pool, authStore, equipment, testMemoryStore })
+registerSearchHistoryRoutes(app, { pool, authStore, memoryStore })
+registerBookingRoutes(app, { pool, authStore, equipment, memoryStore })
 registerEquipmentLocationRoutes(app, {
   pool,
   authStore,
   equipment,
-  testMemoryStore,
+  memoryStore,
 })
 
 const alerts = []
@@ -208,7 +213,10 @@ registerAuthRoutes(app, {
               : "Түрээс Ops нууц үг сэргээх код",
           text: `Таны нэг удаагийн код: ${code}\n\nКод 10 минутын хугацаанд хүчинтэй бөгөөд 5 удаагийн оролдлоготой.\n\nХэрэв та энэ хүсэлтийг илгээгээгүй бол энэ имэйлийг үл тооно уу.`,
         })
+    : localMemoryStore
+      ? async () => {}
     : undefined,
+  exposeVerificationCode: localMemoryStore && !mailer,
 })
 
 if (existsSync(distPath)) {
@@ -314,8 +322,9 @@ const startServer = async () => {
     await initializeSearchHistoryStore(pool)
     await initializeBookingStore(pool)
   }
-  return app.listen(port, "0.0.0.0", () => {
-    console.log(`Ops backend listening on http://0.0.0.0:${port}`)
+  const host = localMemoryStore ? "127.0.0.1" : "0.0.0.0"
+  return app.listen(port, host, () => {
+    console.log(`Ops backend listening on http://${host}:${port}`)
   })
 }
 

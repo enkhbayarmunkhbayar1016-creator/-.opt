@@ -58,7 +58,10 @@ const createVerification = async (store, email, purpose, payload) => {
 const isValidPassword = (password) =>
   typeof password === "string" && password.length >= 8;
 
-export const registerAuthRoutes = (app, { store, sendVerificationCode }) => {
+export const registerAuthRoutes = (
+  app,
+  { store, sendVerificationCode, exposeVerificationCode = false },
+) => {
   app.post(
     "/api/auth/register/request-code",
     asyncRoute(async (req, res) => {
@@ -125,7 +128,10 @@ export const registerAuthRoutes = (app, { store, sendVerificationCode }) => {
         });
       }
       return res.json({
-        message: "Баталгаажуулах 6 оронтой кодыг имэйл рүү илгээлээ.",
+        message: exposeVerificationCode
+          ? "Баталгаажуулах кодыг доорх талбарт оруулна уу."
+          : "Баталгаажуулах 6 оронтой кодыг имэйл рүү илгээлээ.",
+        ...(exposeVerificationCode ? { developmentCode: code } : {}),
       });
     }),
   );
@@ -197,8 +203,9 @@ export const registerAuthRoutes = (app, { store, sendVerificationCode }) => {
       }
 
       const user = await store.findUserByEmail(email);
+      let code;
       if (user) {
-        const code = await createVerification(
+        code = await createVerification(
           store,
           email,
           "reset-password",
@@ -220,7 +227,10 @@ export const registerAuthRoutes = (app, { store, sendVerificationCode }) => {
       }
 
       return res.json({
-        message: "Хэрэв хаяг бүртгэлтэй бол баталгаажуулах код имэйлээр очно.",
+        message: exposeVerificationCode
+          ? "Хэрэв хаяг бүртгэлтэй бол баталгаажуулах кодыг доорх талбарт оруулна уу."
+          : "Хэрэв хаяг бүртгэлтэй бол баталгаажуулах код имэйлээр очно.",
+        ...(exposeVerificationCode && user ? { developmentCode: code } : {}),
       });
     }),
   );

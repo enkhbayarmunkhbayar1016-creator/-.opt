@@ -90,6 +90,7 @@ export default function MobileLogin({
           password,
         })
         setNotice(result.message)
+        setCode(result.developmentCode ?? "")
         setMode("verify-register")
       } else if (mode === "verify-register") {
         const result = await api.verifyRegistrationCode({ email, code })
@@ -100,6 +101,7 @@ export default function MobileLogin({
       } else if (mode === "forgot") {
         const result = await api.forgotPassword({ email })
         setNotice(result.message)
+        setCode(result.developmentCode ?? "")
         setMode("verify-reset")
       } else if (mode === "verify-reset") {
         const result = await api.resetPassword({

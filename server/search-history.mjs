@@ -11,7 +11,7 @@ const validateQuery = (value) => {
 
 export const registerSearchHistoryRoutes = (
   app,
-  { pool, authStore, testMemoryStore = false },
+  { pool, authStore, memoryStore = false },
 ) => {
   const memoryHistory = new Map()
   const requireUser = requireAuthenticatedUser(authStore)
@@ -29,7 +29,7 @@ export const registerSearchHistoryRoutes = (
         )
         return res.json({ items: result.rows })
       }
-      if (testMemoryStore) {
+      if (memoryStore) {
         return res.json({
           items: memoryHistory.get(req.authenticatedUser.id) ?? [],
         })
@@ -93,7 +93,7 @@ export const registerSearchHistoryRoutes = (
           client.release()
         }
       }
-      if (testMemoryStore) {
+      if (memoryStore) {
         const items = memoryHistory.get(req.authenticatedUser.id) ?? []
         items.unshift({ query, searchedAt: new Date().toISOString() })
         items.length = Math.min(items.length, historyLimit)
@@ -114,7 +114,7 @@ export const registerSearchHistoryRoutes = (
         await pool.query("DELETE FROM search_history WHERE user_id = $1", [
           req.authenticatedUser.id,
         ])
-      } else if (testMemoryStore) {
+      } else if (memoryStore) {
         memoryHistory.delete(req.authenticatedUser.id)
       } else {
         return res

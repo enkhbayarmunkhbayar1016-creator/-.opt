@@ -318,4 +318,205 @@ describe("Ops API", { concurrency: false }, () => {
 
     assert.equal(response.status, 404)
   })
+
+  it("supports local registration and app data without external services", async () => {
+    const port = await getAvailablePort()
+    const localBaseUrl = `http://127.0.0.1:${port}`
+    let localOutput = ""
+    const env = {
+      ...process.env,
+      NODE_ENV: "development",
+      LOCAL_AUTH_MEMORY: "true",
+      PORT: String(port),
+    }
+    for (const key of [
+      "AUTH_TEST_MEMORY",
+      "DATABASE_URL",
+      "OTP_SECRET",
+      "SMTP_USER",
+      "SMTP_PASS",
+    ]) {
+      delete env[key]
+    }
+
+    const localServer = spawn("node", ["server/index.mjs"], {
+      cwd: process.cwd(),
+      env,
+      stdio: ["ignore", "pipe", "pipe"],
+    })
+    localServer.stdout.setEncoding("utf8").on("data", (chunk) => {
+      localOutput += chunk
+    })
+    localServer.stderr.setEncoding("utf8").on("data", (chunk) => {
+      localOutput += chunk
+    })
+
+    try {
+      const started = Date.now()
+      let ready = false
+      while (Date.now() - started < 10000) {
+        if (localServer.exitCode !== null) {
+          throw new Error(`Local backend exited before becoming ready:\n${localOutput}`)
+        }
+        try {
+          const response = await fetch(`${localBaseUrl}/api/health`)
+          if (response.ok) {
+            ready = true
+            break
+          }
+        } catch {
+          await new Promise((resolve) => setTimeout(resolve, 100))
+        }
+      }
+      assert.equal(ready, true, `Local backend did not become ready:\n${localOutput}`)
+
+      const sendJson = (method, route, body, token) => {
+        const request = jsonRequest(body)
+        return fetch(`${localBaseUrl}${route}`, {
+          ...request,
+          method,
+          headers: {
+            ...request.headers,
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        })
+      }
+      const postJson = (route, body, token) =>
+        sendJson("POST", route, body, token)
+      const putJson = (route, body, token) =>
+        sendJson("PUT", route, body, token)
+      const registrationResponse = await postJson(
+        "/api/auth/register/request-code",
+        {
+          name: "Local User",
+          company: "",
+          phone: "99128044",
+          email: "local@example.com",
+          password: "local-password",
+        },
+      )
+      const registration = await registrationResponse.json()
+      assert.equal(registrationResponse.status, 200)
+      assert.match(registration.developmentCode, /^\d{6}$/)
+
+      const verificationResponse = await postJson(
+        "/api/auth/register/verify-code",
+        { email: "local@example.com", code: registration.developmentCode },
+      )
+      const verification = await verificationResponse.json()
+      assert.equal(verificationResponse.status, 201)
+      let token = verification.session.token
+
+      const location = {
+        address: "Local test site",
+        coordinates: { latitude: 47.9184, longitude: 106.9177 },
+      }
+      const locationResponse = await putJson(
+        "/api/worksite-location",
+        location,
+        token,
+      )
+      assert.equal(locationResponse.status, 200)
+      const savedLocationResponse = await fetch(
+        `${localBaseUrl}/api/worksite-location`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+      const savedLocation = await savedLocationResponse.json()
+      assert.equal(savedLocationResponse.status, 200)
+      assert.equal(savedLocation.location.address, location.address)
+
+      const bookingResponse = await postJson(
+        "/api/bookings",
+        {
+          equipmentId: "GEN-0162",
+          startDate: "2026-11-17",
+          endDate: "2026-11-18",
+          startTime: "09:00",
+          endTime: "17:00",
+          rentalDays: 2,
+          worksiteAddress: "Local test site",
+          coordinates: { latitude: 47.9184, longitude: 106.9177 },
+          notes: "",
+        },
+        token,
+      )
+      assert.equal(bookingResponse.status, 201)
+      const savedBookingsResponse = await fetch(
+        `${localBaseUrl}/api/bookings`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+      const savedBookings = await savedBookingsResponse.json()
+      assert.equal(savedBookingsResponse.status, 200)
+      assert.equal(savedBookings.items[0].equipmentId, "GEN-0162")
+
+      const equipmentLocationsResponse = await fetch(
+        `${localBaseUrl}/api/equipment-locations`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+      assert.equal(equipmentLocationsResponse.status, 200)
+      const equipmentLocations = await equipmentLocationsResponse.json()
+      assert.deepEqual(equipmentLocations.locations, [])
+
+      const historyResponse = await postJson(
+        "/api/search-history",
+        { query: "generator" },
+        token,
+      )
+      const history = await historyResponse.json()
+      assert.equal(historyResponse.status, 200)
+      assert.equal(history.items[0].query, "generator")
+
+      const recoveryResponse = await postJson(
+        "/api/auth/forgot-password",
+        { email: "local@example.com" },
+      )
+      const recovery = await recoveryResponse.json()
+      assert.equal(recoveryResponse.status, 200)
+      assert.match(recovery.developmentCode, /^\d{6}$/)
+      const resetResponse = await postJson("/api/auth/reset-password", {
+        email: "local@example.com",
+        code: recovery.developmentCode,
+        password: "updated-local-password",
+      })
+      assert.equal(resetResponse.status, 200)
+      const loginResponse = await postJson("/api/auth/login", {
+        email: "local@example.com",
+        password: "updated-local-password",
+        role: "renter",
+      })
+      assert.equal(loginResponse.status, 200)
+      const login = await loginResponse.json()
+      token = login.session.token
+
+      const photoBytes = Buffer.from([
+        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+      ])
+      const photoResponse = await fetch(
+        `${localBaseUrl}/api/equipment/GEN-0162/photo`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "image/png",
+          },
+          body: photoBytes,
+        },
+      )
+      assert.equal(photoResponse.status, 200)
+      const savedPhotoResponse = await fetch(
+        `${localBaseUrl}/api/equipment/GEN-0162/photo`,
+      )
+      assert.deepEqual(
+        Buffer.from(await savedPhotoResponse.arrayBuffer()),
+        photoBytes,
+      )
+      assert.match(localOutput, /http:\/\/127\.0\.0\.1:/)
+    } finally {
+      if (localServer.exitCode === null) {
+        const exited = once(localServer, "exit")
+        localServer.kill("SIGTERM")
+        await exited
+      }
+    }
+  })
 })

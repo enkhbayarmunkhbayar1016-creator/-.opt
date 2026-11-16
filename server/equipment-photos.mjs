@@ -36,7 +36,7 @@ const requireAuthenticatedUser = (authStore) => (req, res, next) => {
 
 export const registerEquipmentPhotoRoutes = (
   app,
-  { equipment, pool, authStore, testMemoryStore = false },
+  { equipment, pool, authStore, memoryStore = false },
 ) => {
   const uploadedEquipmentPhotos = new Map();
 
@@ -128,7 +128,7 @@ export const registerEquipmentPhotoRoutes = (
                  updated_at = NOW()`,
             [item.id, mimeType, imageData],
           );
-        } else if (testMemoryStore) {
+        } else if (memoryStore) {
           uploadedEquipmentPhotos.set(item.id, { mimeType, imageData });
         } else {
           return res
