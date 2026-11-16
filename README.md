@@ -58,7 +58,7 @@ pnpm test:coverage  # frontend coverage report
 ```
 
 For new behavior, use Red-Green-Refactor: add a test that fails for the missing behavior, implement the smallest change that makes it pass, then refactor and rerun the tests.
-The coverage command enforces 100% statement, function, and line coverage for the app modules exercised by the suite; branch coverage is reported as a metric.
+The coverage command enforces 90% statement, function, and line coverage for the app modules exercised by the suite; branch coverage is reported as a metric.
 
 ## Docker deployment
 
